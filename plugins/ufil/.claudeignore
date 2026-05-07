@@ -1,0 +1,35 @@
+# Generated code (freezed, json_serializable, injectable, auto_route, envied)
+**/*.freezed.dart
+**/*.g.dart
+**/*.gr.dart
+**/*.config.dart
+**/generated_plugin_registrant.dart
+
+# Build outputs
+build/
+.dart_tool/
+.fvm/
+
+# Platform dependencies
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+android/.gradle/
+android/app/build/
+
+# Lock files
+pubspec.lock
+
+# Binary assets
+assets/icons/
+assets/images/
+assets/colors/
+assets/fonts/
+
+# IDE files
+.idea/
+*.iml
+
+# Release artifacts
+releases/

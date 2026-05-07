@@ -1,0 +1,32 @@
+# Build outputs
+tmp/
+log/
+storage/
+
+# Dependencies
+vendor/bundle/
+node_modules/
+
+# Database
+db/schema.rb
+
+# Platform
+.bundle/
+.docker/
+
+# Binary assets
+app/assets/images/
+app/assets/builds/
+public/assets/
+public/packs/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Coverage
+coverage/
+
+# OS
+.DS_Store

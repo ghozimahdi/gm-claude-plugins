@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- Colors from AppColor -->
+  <color name="black">#272A2A</color>
+  <color name="gray">#858585</color>
+  <color name="dark_blue">#003ea3</color>
+  <color name="orange">#ff9900</color>
+  <color name="green">#27AE60</color>
+  <color name="red">#EB5757</color>
+  <color name="purple">#483387</color>
+  <color name="purple_shade">#DAD5E7</color>
+  <color name="teal">#58C3C4</color>
+  <color name="white">#FFFFFF</color>
+  <color name="transparent">#00000000</color>
+  <color name="light_gray">#d3d3d3</color>
+
+  <!-- Primary Colors -->
+  <color
+    name="primary"
+    type="material">#5D60EF
+  </color>
+  <color
+    name="secondary"
+    type="material">#58C3C4
+  </color>
+  <color
+    name="tertiary"
+    type="material">#FFBA00
+  </color>
+
+  <!-- UI-Specific Colors -->
+  <color name="left_button_color">#619dfd</color>
+  <color name="right_button_color">#619dfd</color>
+  <color name="main_header">#483387</color>
+  <color name="sub_text">#828282</color>
+  <color name="text_link">#58C3C4</color>
+  <color name="general_feedback_messages">#DEF3F3</color>
+  <color name="status_ongoing">#E6F5FE</color>
+  <color name="status_success">#EBFAED</color>
+  <color name="status_cancel">#FFE5D5</color>
+  <color name="icon_green">#04C99E</color>
+  <color name="icon_primary">#404545</color>
+  <color name="icon_bg_green">#F1FEF0</color>
+  <color name="action_negative">#DF2A36</color>
+  <color name="sidebar">#727890</color>
+
+  <!-- Background Colors -->
+  <color name="accordion_background">#FAFAFA</color>
+  <color name="small_body_background">#CACCCF</color>
+  <color name="currency">#483387</color>
+  <color name="success_background">#ECF5DB</color>
+
+  <!-- Material Design Colors -->
+  <color name="primary_variant">#001B4E</color>
+  <color name="secondary_variant">#0073A1</color>
+  <color name="background">#F0F0F0</color>
+  <color name="container_background">#FAFBFC</color>
+  <color name="error">#D32F2F</color>
+  <color name="on_primary">#FFFFFF</color>
+  <color name="on_secondary">#FFFFFF</color>
+  <color name="on_surface">#000000</color>
+  <color name="on_background">#000000</color>
+  <color name="on_error">#FFFFFF</color>
+  <color name="primary_text">#272A2A</color>
+  <color name="secondary_text">#585F5F</color>
+  <color name="disabled">#A5ABAB</color>
+  <color name="placeholder">#A5ABAB</color>
+  <color name="hint_text">#9E9E9E</color>
+  <color name="border_color">#C0C4C4</color>
+</resources>

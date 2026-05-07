@@ -1,0 +1,32 @@
+{
+  // Disable Dart analyzer for template files — they reference packages that
+  // don't exist at this path (they're scaffolded into a real project later).
+  "dart.analysisExcludedFolders": [
+    "scripts/templates"
+  ],
+
+  // Disable pubspec.yaml JSON-schema validation for template pubspecs.
+  // They contain placeholder tokens like `sdk: __SDK_CONSTRAINT__` and
+  // `dep: any` that would otherwise flag as schema violations.
+  "yaml.schemas": {
+    "https://json.schemastore.org/pubspec.json": [
+      "/pubspec.yaml",
+      "!scripts/templates/**/pubspec.yaml"
+    ]
+  },
+
+  // Stop the file watcher from reacting to template changes (less noise).
+  "files.watcherExclude": {
+    "**/scripts/templates/**/.dart_tool/**": true,
+    "**/scripts/templates/**/build/**": true
+  },
+
+  // Hide generated artifacts from search results inside templates.
+  "search.exclude": {
+    "scripts/templates/**/*.freezed.dart": true,
+    "scripts/templates/**/*.g.dart": true,
+    "scripts/templates/**/*.gr.dart": true,
+    "scripts/templates/**/*.config.dart": true,
+    "scripts/templates/**/*.gen.dart": true
+  }
+}

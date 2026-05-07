@@ -1,0 +1,47 @@
+{
+  "name": "rubyku",
+  "version": "1.0.0",
+  "description": "Rubyku — Claude Code plugin for Rails 8 development. Rails Way architecture, Hotwire-first, Serena LSP for Ruby code intelligence.",
+  "author": {
+    "name": "Ghozi Mahdi",
+    "email": "ghozi.dev@gmail.com"
+  },
+  "repository": "https://github.com/ghozimahdi/gm-claude-plugins",
+  "license": "MIT",
+  "keywords": [
+    "rails",
+    "ruby",
+    "hotwire",
+    "turbo",
+    "stimulus",
+    "rubyku"
+  ],
+  "agentTeams": {
+    "feature-pipeline": {
+      "description": "Standard single-stream feature pipeline: design → implement → review.",
+      "trigger": "/implement",
+      "maxParallel": 1,
+      "stages": [
+        { "stage": "plan", "agent": "rubyku-architect" },
+        { "stage": "implement", "agent": "rubyku-implementer" },
+        { "stage": "review", "agent": "rubyku-reviewer" }
+      ]
+    },
+    "feature-pipeline-batch": {
+      "description": "Multi-stream parallel pipeline. Architect splits work, up to 3 implementers run in parallel worktrees, single reviewer audits the merged result.",
+      "trigger": "/implement-batch",
+      "maxParallel": 3,
+      "stages": [
+        { "stage": "plan", "agent": "rubyku-architect" },
+        {
+          "stage": "implement",
+          "agent": "rubyku-implementer",
+          "parallel": true,
+          "maxAgents": 3,
+          "isolation": "worktree"
+        },
+        { "stage": "review", "agent": "rubyku-reviewer" }
+      ]
+    }
+  }
+}

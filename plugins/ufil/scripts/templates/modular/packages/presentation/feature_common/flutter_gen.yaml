@@ -1,0 +1,53 @@
+flutter_intl:
+  enabled: true
+  class_name: S
+  main_locale: en
+  arb_dir: lib/l10n
+  output_dir: lib/generated
+
+flutter_gen:
+  output: lib/generated/
+  integrations:
+    flutter_svg: true
+
+  assets:
+    enabled: true
+    outputs:
+      package_parameter_enabled: true
+      class_name: AppAssets
+  fonts:
+    enabled: true
+    outputs:
+      class_name: AppFonts
+  colors:
+    enabled: true
+    inputs:
+      - assets/color/colors.xml
+    outputs:
+      class_name: AppColors
+
+flutter:
+  assets:
+    - assets/icons/
+    - assets/images/
+
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/Inter-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/Inter-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Inter-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Inter-Black.ttf
+          weight: 900

@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "team": {
+    "maxParallelAgents": 3,
+    "useWorktreeIsolation": true,
+    "splitStrategy": "by-layer-then-feature"
+  },
+  "autoTrigger": {
+    "enabled": true,
+    "thresholds": {
+      "pages": 3,
+      "blocs": 3,
+      "useCases": 3,
+      "features": 2,
+      "estimatedFiles": 15
+    },
+    "rule": "any"
+  },
+  "splitting": {
+    "byLayer": {
+      "enabled": true,
+      "description": "Split domain+data stream from presentation stream when a single feature exceeds page/bloc threshold"
+    },
+    "byFeature": {
+      "enabled": true,
+      "description": "Split independent features into separate streams (one agent per stream)"
+    }
+  },
+  "agents": {
+    "architectModel": "opus",
+    "implementerModel": "sonnet",
+    "reviewerModel": "sonnet"
+  },
+  "notes": {
+    "rule": "'any' = trigger team mode if ANY threshold is met. 'all' = require all thresholds. 'majority' = >=50% of thresholds met.",
+    "maxParallelAgents": "Hard cap. Streams beyond this are batched into the existing agents sequentially.",
+    "splitStrategy": "'by-layer-then-feature' = first split domain+data vs presentation; if still too large, split presentation by page groups. 'by-feature-only' = never split a single feature across agents."
+  }
+}

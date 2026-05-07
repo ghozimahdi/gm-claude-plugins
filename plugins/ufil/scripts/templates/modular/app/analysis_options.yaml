@@ -1,0 +1,37 @@
+include: package:lint/strict.yaml
+
+analyzer:
+  errors:
+    always_declare_return_types: error
+    missing_required_param: error
+    missing_return: error
+    must_be_immutable: error
+    no_leading_underscores_for_local_identifiers: error
+    prefer_const_constructors: error
+    prefer_final_locals: ignore
+    sort_unnamed_constructors_first: ignore
+    use_is_even_rather_than_modulo: error
+    avoid_empty_else: error
+    invalid_annotation_target: ignore
+    # Optional, nice to have
+    always_put_required_named_parameters_first: error
+    avoid_print: error
+    avoid_dynamic_calls: error
+    avoid_types_on_closure_parameters: error
+    cascade_invocations: error
+    public_member_api_docs: error
+    unawaited_futures: error
+    prefer_expression_function_bodies: ignore
+    require_trailing_commas: ignore
+    sort_pub_dependencies: ignore
+
+  exclude:
+    - lib/**.freezed.dart
+    - lib/**.g.dart
+    - lib/**.gr.dart
+    - lib/**.config.dart
+    - lib/**.gen.dart
+
+linter:
+  rules:
+    prefer_if_elements_to_conditional_expressions: false

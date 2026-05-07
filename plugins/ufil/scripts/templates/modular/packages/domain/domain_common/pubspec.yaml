@@ -1,0 +1,25 @@
+name: domain_common
+description: "Modular project for domain_common"
+version: 1.0.0
+publish_to: 'none'
+resolution: workspace
+
+environment:
+  sdk: __SDK_CONSTRAINT__
+
+dependencies:
+  flutter:
+    sdk: flutter
+  freezed_annotation: any
+  get_it: any
+  injectable: any
+  library_common:
+    path: ../../library/library_common
+
+dev_dependencies:
+  build_runner: any
+  flutter_test:
+    sdk: flutter
+  freezed: any
+  injectable_generator: any
+  lint: any

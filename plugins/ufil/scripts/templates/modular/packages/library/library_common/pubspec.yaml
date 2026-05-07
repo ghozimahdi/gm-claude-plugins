@@ -1,0 +1,21 @@
+name: library_common
+description: "Modular project for library_common"
+version: 1.0.0
+publish_to: 'none'
+resolution: workspace
+
+environment:
+  sdk: __SDK_CONSTRAINT__
+
+dependencies:
+  async: any
+  flutter:
+    sdk: flutter
+  injectable: any
+
+dev_dependencies:
+  build_runner: any
+  flutter_test:
+    sdk: flutter
+  injectable_generator: any
+  lint: any

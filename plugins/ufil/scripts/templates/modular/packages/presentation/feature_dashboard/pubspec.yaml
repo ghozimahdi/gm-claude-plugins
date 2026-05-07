@@ -1,0 +1,33 @@
+name: feature_dashboard
+description: "Modular project for feature_dashboard"
+version: 1.0.0
+publish_to: 'none'
+resolution: workspace
+
+environment:
+  sdk: __SDK_CONSTRAINT__
+
+dependencies:
+  flutter:
+    sdk: flutter
+  library_common:
+    path: ../../library/library_common
+  feature_common:
+    path: ../../presentation/feature_common
+  domain_common:
+    path: ../../domain/domain_common
+  flutter_screenutil: any
+  freezed_annotation: any
+  flutter_bloc: any
+  get_it: any
+  injectable: any
+  auto_route: any
+
+dev_dependencies:
+  auto_route_generator: any
+  build_runner: any
+  flutter_test:
+    sdk: flutter
+  freezed: any
+  injectable_generator: any
+  lint: any

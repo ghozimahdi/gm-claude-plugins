@@ -1,0 +1,12 @@
+targets:
+  $default:
+    builders:
+      freezed:
+        generate_for:
+          include:
+            - lib/src/models/**
+      injectable_generator:injectable_builder:
+        generate_for:
+          include:
+            - lib/src/use_cases/**
+            - lib/src/di/di.dart

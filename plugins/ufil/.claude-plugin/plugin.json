@@ -1,0 +1,20 @@
+{
+  "name": "ufil",
+  "version": "1.0.0",
+  "description": "UFIL (Ultimate Flutter Intelligent Layer) — Claude Code plugin for Flutter Clean Architecture + Modularization with Dart MCP & LSP integration",
+  "author": {
+    "name": "Ghozi Mahdi",
+    "email": "ghozi.dev@gmail.com"
+  },
+  "repository": "https://github.com/ghozimahdi/gm-claude-plugins",
+  "license": "MIT",
+  "keywords": [
+    "flutter",
+    "dart",
+    "clean-architecture",
+    "modularization",
+    "bloc",
+    "freezed",
+    "injectable"
+  ]
+}

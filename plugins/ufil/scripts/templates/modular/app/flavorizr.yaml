@@ -1,0 +1,81 @@
+app:
+  android:
+    flavorDimensions: "flavor-type"
+
+flavors:
+  dev:
+    app:
+      name: "__PROJECT_NAME__ Dev"
+
+    android:
+      icon: "assets/icons/android_app_dev.png"
+      applicationId: "__PACKAGE_NAME__.dev"
+#      firebase:
+#        config: ".firebase/dev/google-services.json"
+    ios:
+      icon: "assets/icons/ios_app_dev.png"
+      bundleId: "__PACKAGE_NAME__.dev"
+#      firebase:
+#        config: ".firebase/dev/GoogleService-Info.plist"
+
+  staging:
+    app:
+      name: "__PROJECT_NAME__ Stg"
+
+    android:
+      icon: "assets/icons/android_app_stg.png"
+      applicationId: "__PACKAGE_NAME__.staging"
+#      firebase:
+#        config: ".firebase/staging/google-services.json"
+    ios:
+      icon: "assets/icons/ios_app_stg.png"
+      bundleId: "__PACKAGE_NAME__.staging"
+#      firebase:
+#        config: ".firebase/staging/GoogleService-Info.plist"
+
+  prod:
+    app:
+      name: "__PROJECT_NAME__"
+
+    android:
+      icon: "assets/icons/android_app_prod.png"
+      applicationId: "__PACKAGE_NAME__"
+#      firebase:
+#        config: ".firebase/prod/google-services.json"
+    ios:
+      icon: "assets/icons/ios_app_prod.png"
+      bundleId: "__PACKAGE_NAME__"
+#      firebase:
+#        config: ".firebase/prod/GoogleService-Info.plist"
+
+ide: idea
+
+instructions:
+  - assets:download
+  - assets:extract
+  - android:androidManifest
+  - android:flavorizrGradle
+  - android:buildGradle
+  - android:dummyAssets
+  - android:icons
+  - android:adaptiveIcons
+  - ios:podfile
+  - ios:xcconfig
+  - ios:buildTargets
+  - ios:schema
+  - ios:dummyAssets
+  - ios:icons
+  - ios:plist
+  - ios:launchScreen
+  - macos:podfile
+  - macos:xcconfig
+  - macos:configs
+  - macos:buildTargets
+  - macos:schema
+  - macos:dummyAssets
+  - macos:icons
+  - macos:plist
+  - google:firebase
+  - huawei:agconnect
+  - assets:clean
+  - ide:config

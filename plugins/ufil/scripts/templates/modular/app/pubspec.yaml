@@ -1,0 +1,97 @@
+name: app
+description: "A new Flutter project."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+resolution: workspace
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+# In Windows, build-name is used as the major, minor, and patch parts
+# of the product and file versions while build-number is used as the build suffix.
+version: 1.0.0+1
+
+environment:
+  sdk: __SDK_CONSTRAINT__
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+  library_common:
+    path: ../packages/library/library_common
+  domain_common:
+    path: ../packages/domain/domain_common
+  domain_auth:
+    path: ../packages/domain/domain_auth
+  data_common:
+    path: ../packages/data/data_common
+  data_auth:
+    path: ../packages/data/data_auth
+  feature_common:
+    path: ../packages/presentation/feature_common
+  feature_auth:
+    path: ../packages/presentation/feature_auth
+  feature_dashboard:
+    path: ../packages/presentation/feature_dashboard
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: any
+  flutter_localizations:
+    sdk: flutter
+  get_it: any
+  injectable: any
+  auto_route: any
+  firebase_crashlytics: any
+  firebase_core: any
+  firebase_messaging: any
+  flutter_local_notifications: any
+  freezed_annotation: any
+  flutter_flavorizr: any
+  change_app_package_name: any
+  flutter_bloc: any
+  flutter_screenutil: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: any
+  auto_route_generator: any
+  injectable_generator: any
+  build_runner: any
+  freezed: any
+  lint: any
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  assets:
+    - assets/icons/

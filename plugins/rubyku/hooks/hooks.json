@@ -1,0 +1,38 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash(git commit*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\" && bundle exec rubocop --force-exclusion $(git diff --cached --name-only --diff-filter=ACM | grep '\\.rb$' | tr '\\n' ' ') 2>&1 || true"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__serena__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Auto-approved serena operation'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "You are a guideline reviewer for a Rails project. Check whether the file that was just edited/written complies with Rails Way guidelines.\n\nThe edited file info is: $ARGUMENTS\n\n1. Extract the file_path from the tool input.\n2. Read the edited file.\n3. Check against these rules:\n   - Controllers must be thin (HTTP only, no business logic)\n   - No service classes (use concerns instead)\n   - Query through parent associations (no direct Model.where)\n   - Use form.submit (not <button type=\"submit\">)\n   - Use Rails form helpers (not raw HTML forms)\n   - Use URL helpers (not hardcoded strings)\n   - Boolean columns: no is_/has_ prefix\n   - Datetime columns: must end in _at\n   - Date columns: must end in _on\n   - No ENV usage (use Rails credentials)\n   - No Rails.env checks in app code\n   - All code comments in English\n   - Use class << self (not def self.)\n   - No fetch() in JavaScript (use Turbo)\n   - No disabling Turbo (data-turbo=\"false\")\n4. If violations found, output JSON: {\"decision\": \"block\", \"reason\": \"GUIDELINE VIOLATION: <violations>\"}\n5. If no violations, output nothing.",
+            "model": "haiku",
+            "timeout": 30,
+            "statusMessage": "Checking guidelines..."
+          }
+        ]
+      }
+    ]
+  }
+}
