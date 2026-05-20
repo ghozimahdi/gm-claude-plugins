@@ -9,25 +9,23 @@ You are the **Implementer** for a Flutter app using Clean Architecture + Bloc. Y
 
 ## Step 0: Resolve plugin docs path (MANDATORY at session start)
 
-This agent ships with reference docs that live INSIDE the plugin directory, NOT in the project working directory. To read them:
+Reference docs live INSIDE the plugin directory, NOT the project working directory.
 
 1. Run `echo $CLAUDE_PLUGIN_ROOT` (Bash tool) to resolve the plugin's absolute path. Cache it for the session.
-2. All `${CLAUDE_PLUGIN_ROOT}/docs/*.md` references below MUST be read from that absolute path. Do NOT look for `docs/` in the project's working directory — the project may have its own `docs/` that shadows plugin docs and points to wrong conventions.
+2. All `${CLAUDE_PLUGIN_ROOT}/docs/*.md` references MUST be read from that absolute path — the project may have its own `docs/` that shadows plugin docs and points to wrong conventions.
 3. Read these BEFORE writing any code (in order):
    - `${CLAUDE_PLUGIN_ROOT}/docs/NAMING_CONVENTIONS.md` — file/class suffixes (`UseCase`, `DataSource`, `Mapper`, …)
    - `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` — event/state shape, sub-state unions, init event
    - `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md` — Model/Params/Result rules
    - `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md` — DTO/Response/Request, datasource, repo impl
    - `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` — separate mapper class rules (apply to BOTH project types)
-4. Existing files in the project may violate plugin conventions. Do NOT mirror their style — follow the plugin docs and fix the existing files when you touch them.
+4. Existing files in the project may violate plugin conventions. Do NOT mirror their style — follow plugin docs and fix existing files when you touch them.
 
 ## Your Role
 
 You claim implementation tasks and write code. You do NOT plan architecture (that's the Architect's job) or write tests (that's the Tester's job).
 
 ## Project Type Detection (MUST DO FIRST)
-
-Before writing any code, detect the project type:
 
 - **Modular**: `packages/` directory exists at project root → multi-package project with melos
 - **Single-module**: No `packages/` directory → single `lib/` project
@@ -40,18 +38,17 @@ This determines which patterns to follow. **NEVER mix patterns between types.**
 
 Always implement in this order:
 
-1. **Domain models** — `@freezed` + `@Default()` fields, no nullable. When a model/params has a `DateTime` field, use `required DateTime` (never `DateTime?`) AND add a `.empty()` factory returning `DateTime.now()` for each DateTime field. Applies to `*_model.dart`, `*_params.dart`, `*_result.dart`. See `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md` → Field Rules.
+1. **Domain models** — `@freezed` + `@Default()` fields, no nullable. See `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md` (DateTime/`.empty()` rules in Field Rules).
 2. **Repository contracts** — abstract class
 3. **UseCases** — `@lazySingleton`, plain `call()` method, no base class
-4. **DTOs/Response/Request models** — `@freezed` + nullable fields + `@JsonKey` on EVERY field, NO `.toModel()` on DTO
+4. **DTOs/Response/Request models** — `@freezed` + nullable + `@JsonKey` on EVERY field, NO `.toModel()` on DTO. See `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md`.
    - DTO (`{Name}Dto`): individual entity from the API
    - Response (`{Action}Response`): full API response wrapper (data + meta)
    - Request (`{Action}Request`): outgoing request body — needs `toJson()` (json_serializable generates it)
-5. **Mappers** — separate `@lazySingleton` classes (BOTH modular AND single-module):
+5. **Mappers** — separate `@lazySingleton` classes (BOTH modular AND single-module). See `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` for full rules including the canonical `nullable_extensions.dart` (forbids private sanitizer helpers).
    - `{Name}ModelMapper` — DTO → Model: `mapFromData(Dto? data)`
    - `{Action}ResultMapper` — Response → Result: `mapFromData(Response? data)`, composes ModelMappers
-   - `{Action}RequestMapper` — Params → Request: `mapFromDomain(Params params)` (only when there is a request body)
-   - **NO private helpers** inside the mapper (`_nullIfEmpty`, `_nullIfZero`, `_formatDate`, etc.). Use the canonical `nullable_extensions.dart` — modular: `packages/data/data_common/lib/src/extensions/nullable_extensions.dart`, single-module: `lib/core/extensions/nullable_extensions.dart`. The API is method-style with parentheses: `.orEmpty()` / `.orZero()` / `.orFalse()` to default a nullable; `.orNull()` to collapse empty/zero to null; `.toIsoDate()` for `DateTime?` → ISO `yyyy-MM-dd` or null. Display fallback `.orDash()` lives in a SEPARATE file — modular: `packages/presentation/feature_common/lib/src/extensions/dash_extensions.dart`, single-module: `lib/core/extensions/dash_extensions.dart`. Never call `.orDash()` inside a mapper (it would send `"-"` as a literal JSON string). When a needed variant is missing, add it to the canonical file in the same change. See `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` → Reusable Sanitization Extensions.
+   - `{Action}RequestMapper` — Params → Request: `mapFromDomain(Params params)` (only when there's a request body)
 6. **Datasources** — `@lazySingleton`, raw API/DB calls, NO try/catch — return raw Response/DTO objects
 7. **Repository impls** — `@LazySingleton(as: Contract)`, with error handler mixin, mapper runs INSIDE the repo
    - Modular (query): injects **ResultMapper** + datasource → `resultMapper.mapFromData(response)` returns `Result`
@@ -66,65 +63,70 @@ Always implement in this order:
 
 ## Mandatory Rules — SHARED (Both Types)
 
+Architecture & patterns:
+
 - **Always Bloc** — never Cubit, never raw setState
-- **@injectable** for DI — never manual getIt.register\*
+- **@injectable** for DI — never manual `getIt.register*`
 - **No try/catch in datasources**
-- **Freezed everywhere** — models (@Default, no nullable), DTOs (nullable + `@JsonKey` on EVERY field)
-- **`@JsonKey` on every DTO field** — even when Dart name matches JSON key (e.g., `@JsonKey(name: 'id') String? id`)
-- **No arrow (=>) for method/function/getter bodies** — use `{ return ...; }`
-- **Bloc file structure** — `part`/`part of`: bloc is main file, event and state are `part of` bloc
-- **`@freezed abstract class`** for events, states, sub-states (not `sealed class`)
+- **Freezed everywhere** — models (`@Default`, no nullable), DTOs (nullable + `@JsonKey` on EVERY field, even when Dart name matches JSON key)
+- **No arrow (`=>`) for method/function/getter bodies** — use `{ return ...; }`
+- **Pages MUST NOT call UseCases directly (NON-NEGOTIABLE)** — every async action (even one-shot ops like logout/refresh/delete) goes through a Bloc. The page only does `context.read<TBloc>().add(event)` to dispatch and `BlocBuilder`/`BlocConsumer`/`BlocSelector`/`BlocListener` to read. A page that imports a UseCase or calls `getIt<XUseCase>()` is ALWAYS wrong — there is NO "too simple to need a bloc" exception. Fix by: (1) add sub-state class for the action, (2) add event to bloc, (3) inject the UseCase into the bloc constructor, (4) page dispatches the event.
+- **No local UI state when Bloc exists** — all state through Bloc events/states
+  - Exception: Flutter controllers (`TextEditingController`, `PageController`, `ScrollController`, `FocusNode`, `AnimationController`, `GlobalKey<FormState>`) are OK as local fields
+- **ScreenUtil for all sizing** — `.w`, `.h`, `.sp`, `.r`
+
+Bloc structure (see `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` for full detail):
+
+- **File structure** — `part`/`part of`: bloc is main file, event and state are `part of` bloc
+- **`@freezed abstract class`** for events, states, sub-states (NOT `sealed class`)
+- **Sub-state freezed unions** per async action — NEVER flat bool flags (`isLoading`, `hasError`)
 - **Sub-state naming** — `{Action}{BlocName}State` with `.idle()`, `.loading()`, `.done()`, `.error()`; `.idle()` is private (`_` prefix), others public
 - **Default init event** — `.init()` → `_InitEvent` → `_initEvent` handler
-- **Handler naming** — handler method MUST mirror the event class name in camelCase: `_InitEvent` → `_initEvent`, `_GetTransactionEvent` → `_getTransactionEvent`, `_SubmittedEvent` → `_submittedEvent`. Drop any `_on` / `_handle` prefix and keep the `Event` suffix.
-- **ScreenUtil for all sizing** — .w, .h, .sp, .r
-- **No local UI state when Bloc exists** — all state through Bloc events/states
-  - Exception: Flutter controllers (TextEditingController, PageController, ScrollController, FocusNode, AnimationController, GlobalKey<FormState>) are OK as local fields
-- **Pages MUST NOT call UseCases directly (NON-NEGOTIABLE)** — every async action (even one-shot ops like logout/refresh/delete) goes through a Bloc. The page only does `context.read<TBloc>().add(event)` to dispatch and `BlocBuilder`/`BlocConsumer`/`BlocSelector`/`BlocListener` to read. A page that imports a UseCase or calls `getIt<XUseCase>()` is ALWAYS wrong — there is NO "too simple to need a bloc" exception. Fix by: (1) add sub-state class for the action, (2) add event to bloc, (3) inject the UseCase into the bloc constructor, (4) page dispatches the event.
-- **Sub-state freezed unions** per async action — NEVER flat bool flags (isLoading, hasError)
-- **No `DateTime?` in domain layer** — every `DateTime` field on `*_model.dart` / `*_params.dart` / `*_result.dart` must be `required DateTime`, AND the class must expose a `.empty()` factory that fills each DateTime with `DateTime.now()`. The `.empty()` factory body uses `{ return ...; }`, never arrow. See `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md`.
-- **No private sanitizer helpers inside mappers** — `_nullIfEmpty`, `_nullIfZero`, `_formatDate`, `_trimOrNull`, and similar value-collapsing helpers MUST be replaced with the canonical `nullable_extensions.dart` (modular: `packages/data/data_common/lib/src/extensions/nullable_extensions.dart`, single-module: `lib/core/extensions/nullable_extensions.dart`). API is method-style with parentheses: `.orEmpty()` / `.orZero()` / `.orFalse()` default a nullable; `.orNull()` collapses empty/zero to null; `.toIsoDate()` formats `DateTime?` as ISO `yyyy-MM-dd` or null. Display fallback `.orDash()` lives in a SEPARATE file (modular: `feature_common`, single-module: `lib/core/extensions/dash_extensions.dart`) and is FORBIDDEN inside a mapper. Never define `nullIfEmpty` / `nullIfZero` / `toIsoDateOrNull` / `orEmpty` as new getters — the canonical method-style API already exists. When a variant is missing, add it to the canonical file in the same change. See `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` → Reusable Sanitization Extensions.
+- **Handler naming** — handler method MUST mirror the event class name in camelCase: `_InitEvent` → `_initEvent`, `_GetTransactionEvent` → `_getTransactionEvent`, `_SubmittedEvent` → `_submittedEvent`. Drop any `_on`/`_handle` prefix and keep the `Event` suffix.
+
+Domain & data invariants (see linked docs for full reasoning):
+
+- **No `DateTime?` in domain layer** — every `DateTime` on `*_model.dart`/`*_params.dart`/`*_result.dart` must be `required DateTime`, and the class must expose a `.empty()` factory that fills each DateTime with `DateTime.now()`. The `.empty()` body uses `{ return ...; }`, never arrow. See `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md`.
+- **No private sanitizer helpers inside mappers** — never `_nullIfEmpty`, `_nullIfZero`, `_formatDate`, `_trimOrNull`. Use the canonical `nullable_extensions.dart` (method-style: `.orEmpty()` / `.orZero()` / `.orFalse()` / `.orNull()` / `.toIsoDate()`). Display fallback `.orDash()` lives in a SEPARATE file and is FORBIDDEN inside a mapper. See `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` → Reusable Sanitization Extensions for exact paths and the rule on adding missing variants.
 
 ### Performance Rules (NON-NEGOTIABLE)
 
+See `${CLAUDE_PLUGIN_ROOT}/skills/flutter-performance/SKILL.md` for full decision matrix. Summary of must-follow rules:
+
 - **Every widget class MUST have `const` constructor** — no exceptions
-- **NO helper methods returning widgets** — extract to `const` widget class instead (helper methods rebuild every frame; `const` widgets are cached by Flutter)
-  - Exception: helper methods that return non-widgets (String, double) or do conditional widget selection inside a single `build()`
-- **`ListView` / `GridView` MUST use `.builder`** for any list with >10 items, with `itemExtent` when height is fixed
-- **Heavy CPU work goes in `compute()`** — never block the UI thread (JSON parse of large payloads, encryption, image manipulation, large list filtering/sorting)
-  - DO NOT wrap `async/await` I/O calls (Dio, file I/O) in `compute()` — they are already non-blocking
+- **NO helper methods returning widgets** — extract to `const` widget class (Exception: helpers that return non-widgets, or conditional widget selection inside a single `build()`)
+- **`ListView`/`GridView` MUST use `.builder`** for any list >10 items, with `itemExtent` when height is fixed
+- **Heavy CPU work in `compute()`** — never block UI thread; do NOT wrap `async/await` I/O (Dio, file I/O) in `compute()`
 - **No allocation in `build()`** — no list mapping, no parsing, no `DateTime.now()`. Compute in Bloc state instead
 - **`BlocSelector` over `BlocBuilder`** when widget depends only on a partial state field
 - **Images use `cacheWidth`/`cacheHeight`** or `CachedNetworkImage` with `memCacheWidth`/`memCacheHeight`
-- **Avoid `saveLayer()` triggers** — `ShaderMask`, `ColorFiltered`, `BackdropFilter`, `Opacity` (with child), `Chip` with translucent `disabledColor`, `Text` with `TextOverflow.fade`. Use static `BoxDecoration.gradient`, full-alpha disabled colors, or `Color.withOpacity()` instead.
-- **`ClipRRect` is last resort** — for solid-color rounded shapes use `Container` + `BoxDecoration(borderRadius:)`. Only use `ClipRRect` when actually clipping a child whose paint extends beyond bounds.
-- **`StringBuffer` for string accumulation in loops** — never `result += '...'` inside `for`/`while` (O(n²)). Use `iterable.map(...).join(', ')` for separator-joined strings.
-- See `${CLAUDE_PLUGIN_ROOT}/skills/flutter-performance/SKILL.md` for full decision matrix
+- **Avoid `saveLayer()` triggers** — `ShaderMask`, `ColorFiltered`, `BackdropFilter`, `Opacity` (with child), `Chip` with translucent `disabledColor`, `Text` with `TextOverflow.fade`. Prefer static `BoxDecoration.gradient`, full-alpha disabled colors, or `Color.withOpacity()`
+- **`ClipRRect` is last resort** — for solid-color rounded shapes use `Container` + `BoxDecoration(borderRadius:)`
+- **`StringBuffer` for string accumulation in loops** — never `result += '...'` in `for`/`while` (O(n²)). Use `iterable.map(...).join(', ')` for separator-joined strings.
 
 ---
 
 ## MODULAR PROJECT Patterns
 
-When `packages/` directory exists:
+When `packages/` directory exists.
 
 ### Error Handling Chain (data_common)
 
-Modular uses a 3-layer chain: DioException → DioErrorInterceptor → AppException → FailureHandlerMixin → Failure
+3-layer: `DioException → DioErrorInterceptor → AppException → FailureHandlerMixin → Failure`
 
-- **AppException**: custom exception hierarchy extending `DioException` (UnauthorizedException, ServerException, etc.)
-- **DioErrorInterceptor**: Dio interceptor that converts `DioException` → `AppException`
-- **FailureHandlerMixin**: `mapToFailure(Object error)` method that maps `AppException`/`DioException` → `Failure`
+- **AppException**: custom exception hierarchy extending `DioException` (`UnauthorizedException`, `ServerException`, etc.)
+- **DioErrorInterceptor**: Dio interceptor converting `DioException` → `AppException`
+- **FailureHandlerMixin**: `mapToFailure(Object error)` mapping `AppException`/`DioException` → `Failure`
 
-### Response Model (Data) — `@freezed`, nullable, `@JsonKey` on EVERY field, the full API response
+### Repository return shape
+
+- **With data** (queries/fetches) → return **Result** model (contains `Failure` + data fields)
+- **Action only** (login, delete, submit, etc.) → return **`Future<Failure>`** directly (`Failure.noFailure()` on success)
+
+### Response/DTO
 
 ```dart
 // packages/data/data_<feature>/lib/src/models/get_tenant_list_response.dart
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'tenant_dto.dart';
-
-part 'get_tenant_list_response.freezed.dart';
-part 'get_tenant_list_response.g.dart';
-
 @freezed
 abstract class GetTenantListResponse with _$GetTenantListResponse {
   const factory GetTenantListResponse({
@@ -136,17 +138,8 @@ abstract class GetTenantListResponse with _$GetTenantListResponse {
     return _$GetTenantListResponseFromJson(json);
   }
 }
-```
 
-Individual DTO for nested objects:
-
-```dart
 // packages/data/data_<feature>/lib/src/models/tenant_dto.dart
-import 'package:freezed_annotation/freezed_annotation.dart';
-
-part 'tenant_dto.freezed.dart';
-part 'tenant_dto.g.dart';
-
 @freezed
 abstract class TenantDto with _$TenantDto {
   const factory TenantDto({
@@ -161,19 +154,12 @@ abstract class TenantDto with _$TenantDto {
 }
 ```
 
-**IMPORTANT**: Modular DTOs/Responses do NOT have `.toModel()`. Use separate mapper classes instead.
+Modular DTOs/Responses do NOT have `.toModel()`. Use separate mapper classes.
 
-### Result Model (Domain) — `@freezed`, contains `Failure` + data
+### Result Model (Domain)
 
 ```dart
 // packages/domain/domain_<feature>/lib/src/models/get_tenant_list_result.dart
-import 'package:domain_common/domain_common.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
-
-import 'tenant_model.dart';
-
-part 'get_tenant_list_result.freezed.dart';
-
 @freezed
 abstract class GetTenantListResult with _$GetTenantListResult {
   const factory GetTenantListResult({
@@ -184,22 +170,10 @@ abstract class GetTenantListResult with _$GetTenantListResult {
 }
 ```
 
-**IMPORTANT**: Modular repositories have TWO return patterns based on whether the method needs to return data:
-
-- **With data** (queries/fetches) → return **Result** model (contains `Failure` + data fields)
-- **Action only** (login, delete, submit, etc.) → return **`Future<Failure>`** directly (`Failure.noFailure()` on success)
-
-### Mapper — separate `@lazySingleton` classes
-
-**ModelMapper** — maps individual DTO → domain model:
+### Mappers — separate `@lazySingleton` classes
 
 ```dart
-// packages/data/data_<feature>/lib/src/mappers/tenant_model_mapper.dart
-import 'package:domain_<feature>/domain_<feature>.dart';
-import 'package:injectable/injectable.dart';
-
-import 'package:data_<feature>/src/models/tenant_dto.dart';
-
+// ModelMapper: DTO → domain model
 @lazySingleton
 class TenantModelMapper {
   TenantModel mapFromData(TenantDto? data) {
@@ -210,22 +184,11 @@ class TenantModelMapper {
     );
   }
 }
-```
 
-**ResultMapper** — maps full Response → Result, composes ModelMappers:
-
-```dart
-// packages/data/data_<feature>/lib/src/mappers/get_tenant_list_result_mapper.dart
-import 'package:domain_<feature>/domain_<feature>.dart';
-import 'package:injectable/injectable.dart';
-
-import 'package:data_<feature>/src/models/get_tenant_list_response.dart';
-import 'package:data_<feature>/src/mappers/tenant_model_mapper.dart';
-
+// ResultMapper: full Response → Result, composes ModelMappers
 @lazySingleton
 class GetTenantListResultMapper {
   final TenantModelMapper _tenantModelMapper;
-
   GetTenantListResultMapper(this._tenantModelMapper);
 
   GetTenantListResult mapFromData(GetTenantListResponse? data) {
@@ -237,37 +200,24 @@ class GetTenantListResultMapper {
 }
 ```
 
-**IMPORTANT**: The ResultMapper receives the **full Response** object from datasource (not individual DTOs). The repository passes `response` directly to `resultMapper.mapFromData(response)`.
+ResultMapper receives the **full Response** object from the datasource (not individual DTOs).
 
-### Repository Contract (Domain)
+### Repository Contract + Impl
 
 ```dart
-// packages/domain/domain_<feature>/lib/src/repositories/
-import 'package:domain_common/domain_common.dart';
-import 'package:domain_<feature>/src/models/get_tenant_list_result.dart';
-
+// Contract
 abstract class TenantRepository {
-  // Query (returns data) → Future<Result>
-  Future<GetTenantListResult> getTenantList();
-
-  // Action (no data needed) → Future<Failure>
-  Future<Failure> deleteTenant(String id);
+  Future<GetTenantListResult> getTenantList();       // Query → Result
+  Future<Failure> deleteTenant(String id);           // Action → Failure
 }
-```
 
-### Repository Impl (Data)
-
-```dart
-// packages/data/data_<feature>/lib/src/repositories/
+// Impl
 @LazySingleton(as: TenantRepository)
-class TenantRepositoryImpl
-    with FailureHandlerMixin
-    implements TenantRepository {
+class TenantRepositoryImpl with FailureHandlerMixin implements TenantRepository {
   const TenantRepositoryImpl(this._datasource, this._resultMapper);
   final TenantRemoteDatasource _datasource;
   final GetTenantListResultMapper _resultMapper;
 
-  // Query → pass response to ResultMapper
   @override
   Future<GetTenantListResult> getTenantList() async {
     try {
@@ -278,7 +228,6 @@ class TenantRepositoryImpl
     }
   }
 
-  // Action → return Failure directly
   @override
   Future<Failure> deleteTenant(String id) async {
     try {
@@ -291,45 +240,20 @@ class TenantRepositoryImpl
 }
 ```
 
-**KEY PATTERNS**:
-
-- **Query** (need data): inject ResultMapper, pass `response` to `resultMapper.mapFromData(response)`, return Result with data or Result with failure
-- **Action** (no data): no mapper needed, return `Failure.noFailure()` on success, `mapToFailure(e)` on error
-
-### UseCase
+### UseCase + Datasource
 
 ```dart
-// Query → returns Future<Result>
 @lazySingleton
 class GetTenantUsecase {
   const GetTenantUsecase(this._repository);
   final TenantRepository _repository;
-
-  Future<GetTenantListResult> call() {
-    return _repository.getTenantList();
-  }
+  Future<GetTenantListResult> call() { return _repository.getTenantList(); }
 }
 
-// Action → returns Future<Failure>
-@lazySingleton
-class DeleteTenantUsecase {
-  const DeleteTenantUsecase(this._repository);
-  final TenantRepository _repository;
-
-  Future<Failure> call(String id) {
-    return _repository.deleteTenant(id);
-  }
-}
-```
-
-### Datasource — returns Response object (not individual DTOs)
-
-```dart
 @lazySingleton
 class TenantRemoteDatasource {
   const TenantRemoteDatasource(this._dio);
   final Dio _dio;
-
   Future<GetTenantListResponse> getTenantList() async {
     final response = await _dio.get('/tenants');
     return GetTenantListResponse.fromJson(response.data as Map<String, dynamic>);
@@ -340,13 +264,11 @@ class TenantRemoteDatasource {
 ### DI — Per-package di.dart + Config class
 
 ```dart
-// Each package: lib/src/di/di.dart
+// lib/src/di/di.dart
 @injectableInit
-void configureInjection({required String env}) {
-  getIt.init(environment: env);
-}
+void configureInjection({required String env}) { getIt.init(environment: env); }
 
-// Each package: lib/src/config/<package>_config.dart
+// lib/src/config/<package>_config.dart
 class DomainTenantConfig extends AppConfig {
   DomainTenantConfig._();
   static final DomainTenantConfig _instance = DomainTenantConfig._();
@@ -360,7 +282,7 @@ class DomainTenantConfig extends AppConfig {
 }
 ```
 
-### Bloc — `part`/`part of` structure, handle both Result and Failure
+### Bloc — `part`/`part of`, switch on result.failure / failure
 
 ```dart
 // tenant_bloc.dart
@@ -385,25 +307,15 @@ class TenantBloc extends Bloc<TenantEvent, TenantState> {
   final GetTenantUsecase _getTenantUsecase;
   final DeleteTenantUsecase _deleteTenantUsecase;
 
-  // Query → switch on result.failure, use result.data
+  // Query → switch on result.failure
   Future<void> _initEvent(_InitEvent event, Emitter<TenantState> emit) async {
-    emit(
-      state.copyWith(tenantState: const GetTenantState.loading()),
-    );
+    emit(state.copyWith(tenantState: const GetTenantState.loading()));
     final result = await _getTenantUsecase();
     switch (result.failure) {
       case NoFailure():
-        emit(
-          state.copyWith(
-            tenantState: GetTenantState.done(items: result.items),
-          ),
-        );
+        emit(state.copyWith(tenantState: GetTenantState.done(items: result.items)));
       default:
-        emit(
-          state.copyWith(
-            tenantState: GetTenantState.error(failure: result.failure),
-          ),
-        );
+        emit(state.copyWith(tenantState: GetTenantState.error(failure: result.failure)));
     }
   }
 
@@ -415,11 +327,7 @@ class TenantBloc extends Bloc<TenantEvent, TenantState> {
       case NoFailure():
         emit(state.copyWith(deleteState: const DeleteTenantState.done()));
       default:
-        emit(
-          state.copyWith(
-            deleteState: DeleteTenantState.error(failure: failure),
-          ),
-        );
+        emit(state.copyWith(deleteState: DeleteTenantState.error(failure: failure)));
     }
   }
 }
@@ -444,7 +352,7 @@ abstract class TenantState with _$TenantState {
   }) = _TenantState;
 }
 
-// Sub-state for query (Result) — uniform shape, all variants carry data + failure
+// Query sub-state — uniform shape, all variants carry data + failure
 @freezed
 abstract class GetTenantState with _$GetTenantState {
   const factory GetTenantState.idle({
@@ -465,7 +373,7 @@ abstract class GetTenantState with _$GetTenantState {
   }) = GetTenantErrorState;
 }
 
-// Sub-state for action (Failure) — only `failure` field, same uniform shape
+// Action sub-state — uniform shape, only `failure`
 @freezed
 abstract class DeleteTenantState with _$DeleteTenantState {
   const factory DeleteTenantState.idle({
@@ -483,10 +391,10 @@ abstract class DeleteTenantState with _$DeleteTenantState {
 }
 ```
 
-### After creating a new package, remember to:
+### After creating a new package
 
 1. Add package path to root `pubspec.yaml` workspace
-2. Add Config init to `app/lib/injector.dart` (domain -> data -> presentation order)
+2. Add Config init to `app/lib/injector.dart` (domain → data → presentation order)
 3. Add route to `app/lib/app_router.dart`
 4. Run: `fvm dart pub get && melos run build`
 
@@ -496,7 +404,7 @@ abstract class DeleteTenantState with _$DeleteTenantState {
 
 When NO `packages/` directory.
 
-**KEY DIFFERENCE FROM MODULAR**: single-module wraps mapped result in `Result<T>` instead of returning `Result` directly. Mapper architecture, naming, and DTO/Response/Request layout are otherwise IDENTICAL to modular.
+**KEY DIFFERENCE FROM MODULAR**: single-module wraps mapped result in `Result<T>` instead of returning a Result domain model directly. Mapper architecture, naming, and DTO/Response/Request layout are otherwise IDENTICAL.
 
 ### Domain — Model + Params + Result
 
@@ -512,7 +420,7 @@ abstract class TenantModel with _$TenantModel {
 }
 
 // lib/features/<feature>/domain/models/get_tenant_list_params.dart
-// Use Params class only when ≥4 fields (DOMAIN_LAYER.md). For 1-3 fields use named params.
+// Params class only when ≥4 fields. For 1–3 fields use named params.
 @freezed
 abstract class GetTenantListParams with _$GetTenantListParams {
   const factory GetTenantListParams({
@@ -524,7 +432,7 @@ abstract class GetTenantListParams with _$GetTenantListParams {
 }
 
 // lib/features/<feature>/domain/models/get_tenant_list_result.dart
-// Result is the SAME shape as modular — but does NOT carry Failure here, because Result<T> wraps it
+// Result here does NOT carry Failure — Result<T> wraps it
 @freezed
 abstract class GetTenantListResult with _$GetTenantListResult {
   const factory GetTenantListResult({
@@ -534,10 +442,10 @@ abstract class GetTenantListResult with _$GetTenantListResult {
 }
 ```
 
-### Data — DTO + Response + Request — `@freezed`, nullable, `@JsonKey` on EVERY field, NO `.toModel()`
+### Data — DTO + Response + Request
 
 ```dart
-// lib/features/<feature>/data/models/tenant_dto.dart
+// tenant_dto.dart
 @freezed
 abstract class TenantDto with _$TenantDto {
   const factory TenantDto({
@@ -551,7 +459,7 @@ abstract class TenantDto with _$TenantDto {
   }
 }
 
-// lib/features/<feature>/data/models/get_tenant_list_response.dart
+// get_tenant_list_response.dart
 @freezed
 abstract class GetTenantListResponse with _$GetTenantListResponse {
   const factory GetTenantListResponse({
@@ -564,7 +472,7 @@ abstract class GetTenantListResponse with _$GetTenantListResponse {
   }
 }
 
-// lib/features/<feature>/data/models/create_tenant_request.dart
+// create_tenant_request.dart
 @freezed
 abstract class CreateTenantRequest with _$CreateTenantRequest {
   const factory CreateTenantRequest({
@@ -581,7 +489,6 @@ abstract class CreateTenantRequest with _$CreateTenantRequest {
 ### Mappers — separate `@lazySingleton` classes (SAME as modular)
 
 ```dart
-// lib/features/<feature>/data/mappers/tenant_model_mapper.dart
 @lazySingleton
 class TenantModelMapper {
   TenantModel mapFromData(TenantDto? data) {
@@ -593,7 +500,6 @@ class TenantModelMapper {
   }
 }
 
-// lib/features/<feature>/data/mappers/get_tenant_list_result_mapper.dart
 @lazySingleton
 class GetTenantListResultMapper {
   GetTenantListResultMapper(this._tenantModelMapper);
@@ -607,7 +513,6 @@ class GetTenantListResultMapper {
   }
 }
 
-// lib/features/<feature>/data/mappers/create_tenant_request_mapper.dart
 @lazySingleton
 class CreateTenantRequestMapper {
   CreateTenantRequest mapFromDomain(CreateTenantParams params) {
@@ -616,23 +521,17 @@ class CreateTenantRequestMapper {
 }
 ```
 
-### Repository Contract (Domain) — returns `Future<Result<T>>`
+### Repository Contract — returns `Future<Result<T>>`
 
 ```dart
-// lib/features/<feature>/domain/repositories/tenant_repository.dart
 abstract class TenantRepository {
-  // Query (returns data) — wrap mapped Result in Result<T>
-  Future<Result<GetTenantListResult>> getTenantList(GetTenantListParams params);
-
-  // Action (no data) — Result<void>
-  Future<Result<void>> deleteTenant(String id);
-
-  // Action with simple return — Result<TenantModel>
-  Future<Result<TenantModel>> createTenant(CreateTenantParams params);
+  Future<Result<GetTenantListResult>> getTenantList(GetTenantListParams params);  // Query
+  Future<Result<void>> deleteTenant(String id);                                    // Action no data
+  Future<Result<TenantModel>> createTenant(CreateTenantParams params);             // Action returning data
 }
 ```
 
-### Repository Impl (Data) — `with ErrorMapper`, mapper runs inside repo
+### Repository Impl — `with ErrorMapper`, mapper runs inside repo
 
 ```dart
 @LazySingleton(as: TenantRepository)
@@ -643,7 +542,6 @@ class TenantRepositoryImpl with ErrorMapper implements TenantRepository {
     this._createRequestMapper,
     this._tenantModelMapper,
   );
-
   final TenantRemoteDataSource _datasource;
   final GetTenantListResultMapper _listResultMapper;
   final CreateTenantRequestMapper _createRequestMapper;
@@ -652,10 +550,7 @@ class TenantRepositoryImpl with ErrorMapper implements TenantRepository {
   @override
   Future<Result<GetTenantListResult>> getTenantList(GetTenantListParams params) async {
     try {
-      final response = await _datasource.getTenantList(
-        page: params.page,
-        limit: params.limit,
-      );
+      final response = await _datasource.getTenantList(page: params.page, limit: params.limit);
       return Result.ok(_listResultMapper.mapFromData(response));
     } catch (e) {
       return Result.error(mapToFailure(e));
@@ -685,36 +580,25 @@ class TenantRepositoryImpl with ErrorMapper implements TenantRepository {
 }
 ```
 
-### UseCase — returns `Future<Result<T>>` matching repo
+### UseCase + Datasource
 
 ```dart
 @lazySingleton
 class GetTenantListUseCase {
   GetTenantListUseCase(this._repository);
   final TenantRepository _repository;
-
   Future<Result<GetTenantListResult>> call(GetTenantListParams params) {
     return _repository.getTenantList(params);
   }
 }
-```
 
-### Datasource — `@lazySingleton`, injects `Dio` only, returns Response/DTO
-
-```dart
 @lazySingleton
 class TenantRemoteDataSource {
   TenantRemoteDataSource(this._dio);
   final Dio _dio;
 
-  Future<GetTenantListResponse> getTenantList({
-    required int page,
-    required int limit,
-  }) async {
-    final response = await _dio.get(
-      '/tenants',
-      queryParameters: {'page': page, 'limit': limit},
-    );
+  Future<GetTenantListResponse> getTenantList({required int page, required int limit}) async {
+    final response = await _dio.get('/tenants', queryParameters: {'page': page, 'limit': limit});
     return GetTenantListResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
@@ -723,9 +607,7 @@ class TenantRemoteDataSource {
     return TenantDto.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<void> deleteTenant(String id) async {
-    await _dio.delete('/tenants/$id');
-  }
+  Future<void> deleteTenant(String id) async { await _dio.delete('/tenants/$id'); }
 }
 ```
 
@@ -740,7 +622,7 @@ Future<void> configureDependencies() async {
 }
 ```
 
-### Bloc — `part`/`part of` structure, sub-state unions per async action, `switch` on Result<T>
+### Bloc — switch on `Result<T>`, sub-state error variant carries `Failure`
 
 ```dart
 // tenant_bloc.dart
@@ -763,7 +645,6 @@ class TenantBloc extends Bloc<TenantEvent, TenantState> {
     on<_InitEvent>(_initEvent);
     on<_GetListEvent>(_getListEvent);
   }
-
   final GetTenantListUseCase _getTenantListUseCase;
 
   Future<void> _initEvent(_InitEvent event, Emitter<TenantState> emit) async {
@@ -775,7 +656,6 @@ class TenantBloc extends Bloc<TenantEvent, TenantState> {
       getTenantListState: const GetTenantListState.loading(),
       alertState: const AlertState.idle(),
     ));
-
     final result = await _getTenantListUseCase(GetTenantListParams(page: event.page));
     switch (result) {
       case Ok(:final value):
@@ -800,7 +680,6 @@ abstract class TenantEvent with _$TenantEvent {
   const factory TenantEvent.init({
     @Default(TenantState()) TenantState state,
   }) = _InitEvent;
-
   const factory TenantEvent.getList({@Default(1) int page}) = _GetListEvent;
 }
 
@@ -815,7 +694,7 @@ abstract class TenantState with _$TenantState {
   }) = _TenantState;
 }
 
-// Sub-state for query — uniform shape, all variants carry result + failure
+// Sub-state for query — uniform shape, error carries Failure (NOT String message)
 @freezed
 abstract class GetTenantListState with _$GetTenantListState {
   const factory GetTenantListState.idle({
@@ -844,7 +723,7 @@ abstract class AlertState with _$AlertState {
 }
 ```
 
-**KEY POINT**: Sub-state error variant carries `Failure failure` (NOT `String message`). Single-module unwraps `Result<T>` in the bloc and stuffs `error` into `failure`. UI reads `state.getTenantListState.failure` for error display. This matches modular's `output.failure` ergonomically.
+**KEY POINT**: Sub-state error variant carries `Failure failure` (NOT `String message`). Single-module unwraps `Result<T>` in the bloc and stuffs `error` into `failure`. UI reads `state.getTenantListState.failure` for error display.
 
 ### Local Storage
 

@@ -6,82 +6,41 @@ disable-model-invocation: true
 
 ## Flutter Performance Patterns (GM Standard)
 
-This skill teaches when to use specific patterns for performance-critical decisions in Flutter UI code.
+Rules + decision matrices for performance-critical Flutter UI choices. For full rationale, profiling workflow, and extended examples, read `${CLAUDE_PLUGIN_ROOT}/docs/PERFORMANCE.md`.
 
 ---
 
 ## 1. Const Class vs Helper Method (CRITICAL)
 
-### Rule: Prefer `const` widget class over helper method when the widget is reused or rebuilt frequently.
+**Rule:** Prefer `const` widget class over helper method when the widget is reused or rebuilt frequently. Helper methods are called every rebuild and cannot be cached by Flutter; `const` widgets are instantiated once and reused.
 
-**Why it matters:**
-
-- Helper methods are **called every rebuild** — Flutter cannot cache the returned widget tree
-- `const` widgets are **instantiated once** and reused on every rebuild — Flutter skips the entire subtree
-- Remi Rousselet (creator of Riverpod/Provider): _"Classes have better default behavior. The only real benefit of methods is writing a bit less code, there's no functional advantage."_
-
-### ❌ Helper Method (avoid for reusable UI)
+### ❌ Helper method (cannot be cached)
 
 ```dart
-class MyPage extends StatelessWidget {
-  Widget _buildPixelContainer() {
-    return Container(
-      width: 6,
-      height: 6,
-      decoration: BoxDecoration(
-        color: Colors.red.shade400,
-        borderRadius: BorderRadius.circular(1),
-      ),
-    );
-  }
+Widget _buildPixelContainer() {
+  return Container(
+    width: 6, height: 6,
+    decoration: BoxDecoration(color: Colors.red.shade400, borderRadius: BorderRadius.circular(1)),
+  );
 }
 ```
 
-Problems:
-
-- New `Container` allocated every rebuild
-- Wastes CPU cycles
-- Cannot be `const`
-- Higher GC pressure on animations
-
-### ✅ Const Widget Class (preferred)
+### ✅ Const widget class (cached by Flutter)
 
 ```dart
 class PixelBox extends StatelessWidget {
   const PixelBox({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 6,
-      height: 6,
-      decoration: BoxDecoration(
-        color: Color(0xFFEF5350),
-        borderRadius: BorderRadius.circular(1),
-      ),
+      width: 6, height: 6,
+      decoration: BoxDecoration(color: Color(0xFFEF5350), borderRadius: BorderRadius.circular(1)),
     );
   }
 }
 
-// Usage — Flutter caches this single instance
-const PixelBox()
+const PixelBox()  // Flutter caches this single instance
 ```
-
-Benefits:
-
-- Allocated **once**, reused on every rebuild
-- Stable identity → Flutter skips rebuild via `Element` reuse
-- Better animation performance (especially in `ListView`/`GridView`)
-- Lower memory churn
-
-### When Helper Methods ARE Acceptable
-
-Helper methods are fine when:
-
-1. **One-shot logic** that doesn't return a widget (e.g., `String _formatPrice(...)`)
-2. **Conditional widget selection** that returns different widget types
-3. **Private composition inside the same widget** that uses the parent's `BuildContext` and ALL params come from `build()` — and is NOT inside an animation/list/frequently-rebuilt subtree
-4. **Trivial wrappers** that themselves return a `const` widget
 
 ### Decision Matrix
 
@@ -95,56 +54,37 @@ Helper methods are fine when:
 | One-time conditional `if/else` inside a single `build()` | helper method OK |
 | Returns non-widget (String, double, etc.)                | helper method OK |
 
-### Mandatory: Always use `const` constructor
+### Mandatory: `const` constructor on every widget
+
+Every `StatelessWidget` and `StatefulWidget` MUST have a `const` constructor — no exceptions, even for StatefulWidgets.
 
 ```dart
-// ❌ Missing const
 class Spacer extends StatelessWidget {
-  Spacer({super.key});  // bad
-}
-
-// ✅ Const constructor
-class Spacer extends StatelessWidget {
-  const Spacer({super.key});  // good
+  const Spacer({super.key});  // required
 }
 ```
-
-Adding `const` to every widget class is **non-negotiable** in this project — even StatefulWidgets must have `const` constructors.
 
 ---
 
 ## 2. Isolate vs compute() vs async/await
 
-### Rule: Default to `async/await`. Use `compute()` for heavy CPU work. Use full `Isolate` only for long-lived background work.
+**Rule:** Default to `async/await`. Use `compute()` for one-shot heavy CPU work (>16ms). Use full `Isolate.spawn()` only for long-lived background work.
 
 ### Decision Tree
 
 ```
 Is the work CPU-bound (heavy computation)?
-├── No (I/O, network, file read) → use async/await
+├── No (I/O, network, file read) → async/await
 └── Yes
-    ├── One-shot heavy computation (>16ms) → use compute()
-    └── Long-lived / streaming heavy work → use Isolate.spawn() + ports
+    ├── One-shot heavy computation (>16ms) → compute()
+    └── Long-lived / streaming heavy work → Isolate.spawn() + ports
 ```
 
-### When to use `async/await` (NOT isolate)
+### Use `compute()` for
 
-Network calls, file I/O, database queries, `await` on Futures — these are **already non-blocking** on the UI thread. **Do not** wrap them in isolates.
-
-```dart
-// ✅ Correct — async/await is enough
-Future<List<Tenant>> fetchTenants() async {
-  final response = await dio.get('/tenants');
-  return response.data;
-}
-```
-
-### When to use `compute()` (one-shot CPU work)
-
-Use for: JSON parsing of large payloads, image manipulation, encryption/decryption, parsing/sorting/filtering large lists, regex on huge strings.
+JSON parsing of large payloads (>10K objects), image manipulation, encryption/decryption, sorting/filtering huge lists, regex on huge strings.
 
 ```dart
-// ✅ Heavy JSON parse — moves work off UI thread
 Future<List<Tenant>> parseTenants(String rawJson) async {
   return compute(_parseTenantsSync, rawJson);
 }
@@ -155,119 +95,79 @@ List<Tenant> _parseTenantsSync(String rawJson) {
 }
 ```
 
-Rules:
+`compute()` rules:
 
-- The function passed to `compute()` MUST be a top-level function or `static` method
-- Arguments and return values MUST be `SendPort`-compatible (primitives, lists, maps, simple objects)
-- DO NOT pass `BuildContext`, `Bloc`, or any object that holds Flutter framework references
+- The function MUST be top-level or `static`
+- Args + return MUST be `SendPort`-compatible (primitives, lists, maps, simple `fromJson`/`toJson` objects)
+- NEVER pass `BuildContext`, `Bloc`, or anything holding Flutter framework refs
+- Spawn cost ~5–20ms — skip for work under 16ms
 
-### When to use full `Isolate.spawn()` (long-lived)
-
-Use for: continuous background processing (e.g., live image filter pipeline, real-time audio processing, long-running ML inference loop).
-
-For this project, **prefer `compute()`** — full `Isolate` is rarely needed in CRUD apps.
-
-### ❌ Common Mistakes
+### ❌ Common mistakes
 
 ```dart
-// ❌ Don't isolate I/O — it's already async
-final result = await compute(_fetchFromApi, url);  // pointless
-
-// ❌ Don't pass non-serializable objects
-await compute(_doWork, context);  // crash
-
-// ❌ Don't isolate work <16ms — the spawn cost exceeds the gain
-await compute(_addTwoNumbers, [1, 2]);  // wasteful
+await compute(_fetchFromApi, url);   // I/O already async → pointless
+await compute(_doWork, context);     // non-serializable → crash
+await compute(_addTwoNumbers, [1,2]);// spawn cost > work → wasteful
 ```
+
+For CRUD apps, full `Isolate.spawn()` is rarely needed — prefer `compute()`.
 
 ---
 
 ## 3. ListView / GridView Performance
 
-### Rule: ALWAYS use `.builder` for lists with > ~10 items. Add `const` items + cache extents.
-
-### ❌ Renders all items eagerly
+**Rule:** ALWAYS use `.builder` for lists with >10 items. Add `itemExtent` when height is fixed and stable `ValueKey` for reorderable items.
 
 ```dart
-ListView(
-  children: tenants.map((t) => TenantCard(tenant: t)).toList(),
-)
-```
+// ❌ Renders all items eagerly, even off-screen
+ListView(children: tenants.map((t) => TenantCard(tenant: t)).toList())
 
-### ✅ Lazy build via builder
-
-```dart
-ListView.builder(
-  itemCount: tenants.length,
-  itemBuilder: (context, index) => TenantCard(tenant: tenants[index]),
-)
-```
-
-### Optimizations
-
-```dart
+// ✅ Lazy + fully optimized
 ListView.builder(
   itemCount: tenants.length,
   itemExtent: 80.h,            // fixed height → skip layout pass
   cacheExtent: 500,            // pre-render off-screen items
   addAutomaticKeepAlives: false,
-  addRepaintBoundaries: true,  // default true — keep it
   itemBuilder: (context, index) => TenantCard(
-    key: ValueKey(tenants[index].id),
+    key: ValueKey(tenants[index].id),  // stable id, NOT index
     tenant: tenants[index],
   ),
 )
 ```
 
-Rules:
-
-- Use `itemExtent` when item height is fixed → drops layout cost
-- Use `ValueKey` from a stable id (NOT index) for items that can reorder
-- Avoid `shrinkWrap: true` unless inside another scrollable — it forces layout of all children
+- `itemExtent` only when height is truly fixed → drops layout cost
+- `ValueKey(id)` for reorderable/insertable/deletable items — never `ValueKey(index)`
+- Avoid `shrinkWrap: true` unless nested inside another scrollable — forces full layout
+- `addRepaintBoundaries: true` is default — keep it; do NOT wrap items in another `RepaintBoundary`
 
 ---
 
 ## 4. RepaintBoundary
 
-### Rule: Wrap widgets that repaint independently from their parent.
-
-Use cases:
-
-- Animation widgets inside a static layout
-- Charts / canvases / video
-- Items inside a scrolling list with heavy paint operations
+**Rule:** Wrap widgets that repaint independently from their parent — animated widgets, charts, canvases, video players. Skip for `ListView.builder` items (already wrapped by default).
 
 ```dart
-// ✅ Animation isolated from parent's repaint
-RepaintBoundary(
-  child: Lottie.asset('assets/loading.json'),
-)
+RepaintBoundary(child: Lottie.asset('assets/loading.json'))
 ```
-
-`ListView.builder` already adds `RepaintBoundary` per item by default — do NOT wrap items again.
 
 ---
 
 ## 5. Image Performance
 
-### Rules:
-
-- Use `cacheWidth`/`cacheHeight` to decode at display size — NOT full resolution
-- Use `cached_network_image` for network images (already in many GM projects)
-- Prefer `ResizeImage` over manual resize
+**Rule:** Decode at display size, not source size. A 4000×3000 image at 100×100 still allocates ~48MB by default → 50 items = 2.4GB.
 
 ```dart
-// ❌ Decodes 4K image into memory for a 100x100 display
+// ❌ Full-resolution decode
 Image.network('https://.../photo.jpg')
 
-// ✅ Decodes only at display size
+// ✅ Decoded at display size
 Image.network(
   'https://.../photo.jpg',
   cacheWidth: (100 * MediaQuery.of(context).devicePixelRatio).toInt(),
   cacheHeight: (100 * MediaQuery.of(context).devicePixelRatio).toInt(),
 )
 
-// ✅ Or with cached_network_image
+// ✅ Or via cached_network_image (preferred for network)
 CachedNetworkImage(
   imageUrl: url,
   memCacheWidth: 200,
@@ -279,18 +179,18 @@ CachedNetworkImage(
 
 ## 6. Build Method Discipline
 
-### Rules:
+**Rules:**
 
-- NEVER do allocation-heavy work inside `build()` (no list mapping, no parsing, no DateTime.now())
-- NEVER call `setState` synchronously inside `build()`
+- NO allocation in `build()` — no list mapping, no parsing, no `DateTime.now()`
+- NO `setState` synchronously inside `build()` (causes infinite rebuild)
 - Move expensive computations to `initState`, `didChangeDependencies`, or memoize via `late final`
-- For Bloc-driven UI, derive computed values inside the bloc state (NOT inside `build()`)
+- For Bloc UI, derive computed values inside the bloc state — NEVER inside `build()`
 
 ```dart
 // ❌ Recomputed every rebuild
 @override
 Widget build(BuildContext context) {
-  final filtered = tenants.where((t) => t.active).toList();  // bad
+  final filtered = tenants.where((t) => t.active).toList();
   return ListView(...);
 }
 
@@ -300,36 +200,37 @@ state.copyWith(filteredTenants: tenants.where((t) => t.active).toList())
 
 ---
 
-## 7. Selector / BlocSelector — narrow rebuilds
+## 7. BlocSelector — Narrow Rebuilds
 
-When a widget only depends on **part** of a Bloc state, use `BlocSelector` to skip rebuilds when other state fields change.
+**Rule:** When a widget depends only on part of a Bloc state, use `BlocSelector` so it skips rebuilds for unrelated state changes.
 
 ```dart
-// ❌ Whole widget rebuilds when ANY state field changes
+// ❌ Rebuilds on ANY state change
 BlocBuilder<TenantBloc, TenantState>(
   builder: (context, state) => Text(state.tenant.name),
 )
 
-// ✅ Only rebuilds when name changes
+// ✅ Rebuilds only when name changes
 BlocSelector<TenantBloc, TenantState, String>(
   selector: (state) => state.tenant.name,
   builder: (context, name) => Text(name),
 )
 ```
 
+For nested objects, ensure the selector returns a stable reference (rely on Freezed `==`).
+
 ---
 
 ## 8. Animations
 
-### Rules:
+**Rules:**
 
-- Use `AnimatedBuilder` with a `child` parameter for static subtrees inside the animation
-- Use `RepaintBoundary` around animated widgets
+- Use `AnimatedBuilder` with a `child:` parameter for static subtrees (child is built once)
+- Wrap animated widgets in `RepaintBoundary`
 - Prefer implicit animations (`AnimatedContainer`, `AnimatedOpacity`) over manual `AnimationController` when possible
-- For complex animations, use `Tween` + `Curves` from existing instances (don't create per build)
+- Reuse `Tween` and `Curves` instances — never create them per build
 
 ```dart
-// ✅ child is built ONCE, not per frame
 AnimatedBuilder(
   animation: _controller,
   child: const HeavyWidget(),  // built once
@@ -344,129 +245,68 @@ AnimatedBuilder(
 
 ## 9. Stream / Future Patterns
 
-- Avoid `StreamBuilder` / `FutureBuilder` for data that flows through Bloc — let the Bloc handle the lifecycle
-- Cancel `StreamSubscription` in `close()` of Bloc, `dispose()` of StatefulWidget
-- Use `bufferTime` / `debounce` (rxdart) for high-frequency streams (search input, scroll events)
+- Avoid `StreamBuilder` / `FutureBuilder` for Bloc-flowing data — let the Bloc own the lifecycle
+- Cancel `StreamSubscription` in `close()` of Bloc / `dispose()` of StatefulWidget
+- Debounce/buffer high-frequency streams (search input, scroll events) with rxdart
 
 ---
 
 ## 10. Avoid `saveLayer()` Triggers (off-screen rendering)
 
-### Rule: Avoid widgets that silently call `Canvas.saveLayer()` — it forces the GPU to render to an off-screen buffer, then copy back. Heavy operation, FPS killer, battery drain.
+**Rule:** Avoid widgets that silently call `Canvas.saveLayer()` — the GPU then renders to an off-screen buffer and copies back. Doubles work per frame; multiplied across list items or animation frames it kills FPS.
 
-`saveLayer()` is one of the most expensive Flutter operations. The GPU normally draws **directly to the screen**, but `saveLayer()` forces it to:
+### Widgets that trigger `saveLayer()`
 
-1. Create a separate off-screen buffer
-2. Draw the UI there
-3. Copy it back to the main canvas
+| Widget                             | When it triggers                         | Mitigation                                                                                                              |
+| ---------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `ShaderMask`                       | always                                   | static gradient via `Container` decoration                                                                              |
+| `ColorFiltered` / `ColorFilter`    | always                                   | bake filter into asset/image                                                                                            |
+| `BackdropFilter`                   | always                                   | static blurred image asset if blur is constant                                                                          |
+| `Opacity` (with painted child)     | when `opacity != 1.0 && != 0.0`          | `Image(opacity:)` for images, `Color.withOpacity()` on `BoxDecoration` for color, `AnimatedOpacity` only when animated  |
+| `Chip` / `RawChip`                 | when `disabledColor` alpha `!= 0xff`     | use full-alpha disabled color or custom widget                                                                          |
+| `Text` with overflow shader        | `overflow: TextOverflow.fade`            | use `TextOverflow.ellipsis` or `clip`                                                                                   |
+| `ClipPath` / `ClipOval`            | always (with anti-aliasing)              | `BoxDecoration.shape: BoxShape.circle` for circles                                                                      |
 
-That's **double work** per frame — multiplied by every item in a `ListView` or every frame of an animation, it crushes FPS.
-
-### Widgets that trigger `saveLayer()` under the hood
-
-| Widget                             | When it triggers                         | Mitigation                                                                                                                              |
-| ---------------------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `ShaderMask`                       | always                                   | use static gradient `Container` decoration if possible                                                                                  |
-| `ColorFiltered` / `ColorFilter`    | always                                   | bake the filter into the asset/image instead                                                                                            |
-| `BackdropFilter`                   | always                                   | use a static blurred image asset if the blur is constant                                                                                |
-| `Opacity` (with child that paints) | when `opacity != 1.0 && != 0.0`          | use `AnimatedOpacity` only when needed; for images use `Image(opacity:)`; for color use `Color.withOpacity()` on `Container` decoration |
-| `Chip` / `RawChip`                 | when `disabledColor` has alpha `!= 0xff` | use full-alpha disabled color OR build a custom widget                                                                                  |
-| `Text` with overflow shader        | `overflow: TextOverflow.fade`            | use `TextOverflow.ellipsis` or `clip`                                                                                                   |
-| `ClipPath` / `ClipOval`            | always (with anti-aliasing)              | use `BoxDecoration.shape` if possible                                                                                                   |
-
-### ❌ Triggers `saveLayer()`
+### ❌ Triggers saveLayer
 
 ```dart
-// Forces off-screen buffer for the gradient mask
-ShaderMask(
-  shaderCallback: (bounds) => const LinearGradient(
-    colors: [Colors.blue, Colors.purple],
-  ).createShader(bounds),
-  child: Container(...),
-)
-
-// Disabled chip with translucent disabledColor → saveLayer() per frame
-RawChip(
-  isEnabled: false,
-  disabledColor: Colors.grey.withAlpha(150),  // alpha != 0xff
-  label: const Text('Disabled'),
-)
-
-// Opacity wrapping a complex subtree → entire subtree off-screen
-Opacity(
-  opacity: 0.5,
-  child: ComplexCard(...),
-)
+ShaderMask(shaderCallback: (b) => LinearGradient(colors: [...]).createShader(b), child: ...)
+RawChip(isEnabled: false, disabledColor: Colors.grey.withAlpha(150), label: ...)
+Opacity(opacity: 0.5, child: ComplexCard(...))
 ```
 
-### ✅ No `saveLayer()`
+### ✅ No saveLayer
 
 ```dart
-// Static gradient as decoration — paints directly
-Container(
-  decoration: BoxDecoration(
-    gradient: LinearGradient(colors: [Colors.blue, Colors.purple]),
-  ),
-  child: ...,
-)
-
-// Use full-alpha disabled color
-RawChip(
-  isEnabled: false,
-  disabledColor: Color(0xFFE0E0E0),  // full alpha
-  label: const Text('Disabled'),
-)
-
-// Apply opacity to the color, not the widget
-Container(
-  color: Colors.black.withOpacity(0.5),
-  child: ComplexCard(...),
-)
+Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [...])), child: ...)
+RawChip(isEnabled: false, disabledColor: Color(0xFFE0E0E0), label: ...)
+Container(color: Colors.black.withOpacity(0.5), child: ComplexCard(...))
 ```
 
 ### How to verify
 
-Open **DevTools → Performance → Timeline Events** tab and filter by `saveLayer`. If you see the keyword appear thousands of times, you have a problem. Cross-reference with red **"Raster Jank"** spikes in the Frames graph.
+DevTools → Performance → Timeline Events → filter `saveLayer`. Cross-reference with red "Raster Jank" spikes in the Frames graph.
 
 ---
 
 ## 11. ClipRRect — prefer `BoxDecoration.borderRadius`
 
-### Rule: Use `ClipRRect` only when you MUST clip child content. For a rounded rectangle with color/gradient, use `BoxDecoration.borderRadius` on `Container` — it paints natively, no off-screen buffer.
-
-`ClipRRect` forces off-screen rendering. `BoxDecoration` is drawn natively by the GPU in a single step.
-
-### ❌ Expensive — clipping triggers off-screen render
+**Rule:** `ClipRRect` forces off-screen rendering. For rounded shapes with color/gradient, use `BoxDecoration.borderRadius` on `Container` — drawn natively in a single GPU pass.
 
 ```dart
+// ❌ Clipping triggers off-screen render
 ClipRRect(
   borderRadius: BorderRadius.circular(12),
-  child: Container(
-    padding: const EdgeInsets.all(16),
-    color: Colors.blue,
-    child: const Text('Submit'),
-  ),
+  child: Container(padding: EdgeInsets.all(16), color: Colors.blue, child: Text('Submit')),
 )
-```
 
-### ✅ Native — paints directly to screen
-
-```dart
+// ✅ Native single-pass paint
 Container(
   padding: const EdgeInsets.all(16),
-  decoration: BoxDecoration(
-    color: Colors.blue,
-    borderRadius: BorderRadius.circular(12),
-  ),
+  decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(12)),
   child: const Text('Submit'),
 )
 ```
-
-### When `ClipRRect` is actually needed
-
-- Clipping an `Image` to rounded corners → use `ClipRRect`, OR better: `Image` inside `Container` with `BoxDecoration.image` + `borderRadius`
-- Clipping a `Hero` / animated child where decoration won't work
-- Rounding a child whose paint extends beyond the parent (custom painters, video, etc.)
 
 ### Decision
 
@@ -475,60 +315,33 @@ Container(
 | Rounded button / card with solid color | `Container` + `BoxDecoration`                                                 |
 | Rounded gradient                       | `Container` + `BoxDecoration(gradient: ..., borderRadius: ...)`               |
 | Rounded image                          | `Container` + `BoxDecoration(image: DecorationImage(...), borderRadius: ...)` |
-| Clipping arbitrary child widgets       | `ClipRRect` (last resort)                                                     |
+| Clipping arbitrary child widgets       | `ClipRRect` (last resort — Hero, video, CustomPaint, animated children)       |
 
 ---
 
 ## 12. String Concatenation — `StringBuffer` for loops
 
-### Rule: For string building inside a loop or any `n`-iteration accumulation, use `StringBuffer`. The `+=` operator creates a new `String` allocation on every iteration → O(n²) complexity.
-
-In Dart, `String` is immutable. `s += x` allocates a new string of size `len(s) + len(x)` and copies the old content. In a loop, this is quadratic.
-
-### ❌ O(n²) — allocates per iteration
+**Rule:** For string building inside a loop, use `StringBuffer` (O(n)). The `+=` operator allocates a new `String` on every iteration → O(n²).
 
 ```dart
+// ❌ O(n²) — 1000 users ≈ 1000 throwaway strings, ~500K chars of garbage
 String result = '';
 for (final user in users) {
   result += 'Mr ${user.firstName} ${user.lastName}, ';
 }
-```
 
-For 1000 users this allocates ~1000 intermediate strings, ~500K characters of throwaway memory.
-
-### ✅ O(n) — single buffer, write in place
-
-```dart
+// ✅ O(n)
 final buffer = StringBuffer();
 for (final user in users) {
   buffer.write('Mr ${user.firstName} ${user.lastName}, ');
 }
 final result = buffer.toString();
-```
 
-### When `+=` is fine
-
-- Concatenating a **small, fixed number** of strings (2–5)
-- Outside a loop, single-shot expressions
-
-```dart
-// Fine — fixed concatenation
-final fullName = '${user.firstName} ${user.lastName}';
-
-// Fine — small, fixed parts
-final url = baseUrl + '/api/v1' + '/users';
-```
-
-### Alternatives
-
-- For collection-to-string with separator → use `Iterable.join()`:
-
-```dart
-// ✅ Idiomatic for joining
+// ✅ Idiomatic for collection + separator
 final result = users.map((u) => 'Mr ${u.firstName} ${u.lastName}').join(', ');
 ```
 
-### Rule of thumb
+`+=` is fine for 2–5 fixed parts outside a loop (`final fullName = '${u.firstName} ${u.lastName}';`).
 
 | Situation                                   | Use                  |
 | ------------------------------------------- | -------------------- |
@@ -541,25 +354,23 @@ final result = users.map((u) => 'Mr ${u.firstName} ${u.lastName}').join(', ');
 
 ## 13. Performance Quick Checklist (Reviewer)
 
-Before approving a UI PR, verify:
-
 - [ ] Every `StatelessWidget` / `StatefulWidget` has `const` constructor
-- [ ] No helper methods returning widgets (use class instead)
+- [ ] No helper methods returning widgets (use `const` widget class instead)
 - [ ] `ListView` / `GridView` uses `.builder` for dynamic lists
 - [ ] `itemExtent` set when item height is fixed
 - [ ] No allocation / heavy work in `build()`
-- [ ] `compute()` used for heavy CPU work, not async I/O
+- [ ] `compute()` used for heavy CPU work, NOT for async I/O
 - [ ] `BlocSelector` used when widget depends on partial state
 - [ ] `RepaintBoundary` around independent-paint widgets
 - [ ] Images use `cacheWidth`/`cacheHeight` or `CachedNetworkImage` with mem cache size
 - [ ] No `shrinkWrap: true` outside nested scrollables
-- [ ] Stable `ValueKey` for reorderable list items
+- [ ] Stable `ValueKey` (from id) for reorderable list items
 - [ ] No `ShaderMask` / `ColorFiltered` / `BackdropFilter` inside list items or animated subtrees
-- [ ] No `Chip` / `RawChip` with `disabledColor` having alpha `!= 0xff`
-- [ ] No `Opacity` wrapping complex children — use `Color.withOpacity()` on decoration, or `AnimatedOpacity` only when necessary
+- [ ] No `Chip` / `RawChip` with `disabledColor` alpha `!= 0xff`
+- [ ] No `Opacity` wrapping complex children — use `Color.withOpacity()` on decoration, or `AnimatedOpacity` only when needed
 - [ ] `ClipRRect` only when truly needed — prefer `Container` + `BoxDecoration.borderRadius`
-- [ ] `StringBuffer` (or `.join()`) used for string accumulation in loops — never `+=` in `for`/`while`
-- [ ] No `Text` with `TextOverflow.fade` (triggers `saveLayer`) — use `ellipsis` / `clip`
+- [ ] `StringBuffer` (or `.join()`) used for string accumulation in loops — never `+=`
+- [ ] No `Text` with `TextOverflow.fade` (triggers saveLayer) — use `ellipsis` / `clip`
 
 ---
 
@@ -587,4 +398,4 @@ Before approving a UI PR, verify:
 
 ## References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/PERFORMANCE.md` — Full developer-facing reference with profiling workflow and rationale
+- `${CLAUDE_PLUGIN_ROOT}/docs/PERFORMANCE.md` — full developer-facing reference: rationale, profiling workflow, extended examples
