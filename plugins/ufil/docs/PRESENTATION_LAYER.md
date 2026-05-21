@@ -382,3 +382,50 @@ import 'package:feature_auth/src/config/feature_auth_route.gr.dart';
 import '../model/...';
 import './widget/...';
 ```
+
+## Colors — flutter_gen `AppColors` (NON-NEGOTIABLE)
+
+Every color used in the presentation layer MUST come from the generated `AppColors` class (produced by `flutter_gen` from `colors.xml`). This applies to BOTH project types.
+
+**Source of truth:**
+
+| Project type  | `colors.xml` location                                              | Generated file                                                       | Regen command                                              |
+| ------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Modular       | `packages/presentation/feature_common/assets/colors/colors.xml`    | `packages/presentation/feature_common/lib/gen/colors.gen.dart`       | `melos run generate:assets`                                    |
+| Single-module | `assets/colors/colors.xml`                                         | `lib/gen/colors.gen.dart`                                            | `fvm dart run build_runner build --delete-conflicting-outputs` |
+
+### ❌ Forbidden
+
+```dart
+Container(color: Color(0xFFEF5350))                       // raw hex literal
+Container(color: Colors.red)                              // material Colors.*
+Container(color: Colors.grey.shade400)                    // .shadeXxx
+Container(color: Color(int.parse('0xFFEF5350')))          // runtime-parsed hex
+ThemeData(primaryColor: const Color(0xFF1976D2))          // hex in theme builder
+```
+
+### ✅ Required
+
+```dart
+import 'package:feature_common/gen/colors.gen.dart';     // modular
+// import 'package:<app_name>/gen/colors.gen.dart';      // single-module
+
+Container(color: AppColors.danger)
+Container(color: AppColors.brandPrimary)
+ThemeData(primaryColor: AppColors.brandPrimary)
+```
+
+### Adding a new color
+
+Never inline a hex literal "temporarily". The required sequence:
+
+1. Add the entry to `colors.xml`:
+   ```xml
+   <color name="brandAccent">#FF8A65</color>
+   ```
+2. Run the regen command for your project type (see table above).
+3. Use the generated reference: `AppColors.brandAccent`.
+
+### Exception
+
+The generated `colors.gen.dart` file is the ONLY file allowed to contain raw `Color(0x..)` literals. It must never be hand-edited — always regenerate from `colors.xml`.

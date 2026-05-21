@@ -76,9 +76,18 @@ This determines which patterns are correct and which are violations. **Applying 
 - Models with nullable fields (should use @Default)
 - DTOs with non-nullable fields (should be nullable)
 - Pages without ScreenUtil extensions (.w, .h, .sp, .r)
-- Hardcoded colors not using theme
 - Bloc without @injectable annotation
 - Missing BlocProvider in widget tree
+
+### Color Violations (Critical — applies to BOTH project types)
+Source of truth for every color is `colors.xml` (consumed by `flutter_gen` → `colors.gen.dart` → `AppColors`). Flag every occurrence of:
+- `Color(0xFF...)` / `Color(0x...)` / `const Color(...)` literal in any presentation/widget file — must be `AppColors.<name>`
+- `Colors.red` / `Colors.blue` / `Colors.grey` / any other `Colors.*` constant from `material.dart` — must be `AppColors.<name>`
+- `.shade100`/`.shade400`/etc. on `MaterialColor` — must be a discrete entry in `colors.xml`
+- Inline hex strings parsed at runtime (`Color(int.parse('0xFF...'))`) — same fix
+- A new color introduced directly in Dart without first being added to `colors.xml` — flag as missing source-of-truth update. Required fix sequence: (1) add entry to `colors.xml`, (2) regenerate (modular: `melos run generate:assets`; single-module: `dart run build_runner build -d`), (3) reference via `AppColors.<name>` in code.
+- Theme constants like `Theme.of(context).colorScheme.primary` are acceptable ONLY when the theme itself is built from `AppColors` — flag if a theme is constructed from raw `Color(0x..)` literals.
+Exception (not a violation): the generated file `lib/gen/colors.gen.dart` itself (single-module) or `packages/presentation/feature_common/lib/gen/colors.gen.dart` (modular) — never hand-edit, never flag.
 
 ### Code Quality (Info)
 - Unused imports or variables

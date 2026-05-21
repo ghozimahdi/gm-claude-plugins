@@ -74,6 +74,11 @@ Architecture & patterns:
 - **No local UI state when Bloc exists** — all state through Bloc events/states
   - Exception: Flutter controllers (`TextEditingController`, `PageController`, `ScrollController`, `FocusNode`, `AnimationController`, `GlobalKey<FormState>`) are OK as local fields
 - **ScreenUtil for all sizing** — `.w`, `.h`, `.sp`, `.r`
+- **Colors MUST come from `AppColors` (flutter_gen)** — NEVER `Color(0xFF...)`, NEVER `Colors.red`/`Colors.blue`/`Colors.grey`/`.shadeXxx`, NEVER inline hex. Source of truth is `colors.xml`. Workflow when a needed color is missing:
+  1. Add the entry to `colors.xml` (modular: `packages/presentation/feature_common/assets/colors/colors.xml`; single-module: `assets/colors/colors.xml`).
+  2. Regenerate — modular: `melos run generate:assets`; single-module: `fvm dart run build_runner build --delete-conflicting-outputs`.
+  3. Use `AppColors.<name>` in the widget (import from `package:feature_common/gen/colors.gen.dart` in modular, or `package:<app>/gen/colors.gen.dart` in single-module).
+  Never inline a hex literal then "add to colors.xml later" — the literal must never be committed. Generated `colors.gen.dart` is the ONLY file allowed to contain raw `Color(0x..)`.
 
 Bloc structure (see `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` for full detail):
 

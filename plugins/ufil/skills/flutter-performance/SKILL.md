@@ -8,6 +8,8 @@ disable-model-invocation: true
 
 Rules + decision matrices for performance-critical Flutter UI choices. For full rationale, profiling workflow, and extended examples, read `${CLAUDE_PLUGIN_ROOT}/docs/PERFORMANCE.md`.
 
+> **Note on colors in examples**: GM standard requires every color to come from generated `AppColors` (flutter_gen → `colors.gen.dart`). The snippets below use raw `Color(0x..)` / `Colors.xxx` only to keep the performance contrast self-contained — production code MUST use `AppColors.<name>`. See the Color rule in `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md` and the implementer agent.
+
 ---
 
 ## 1. Const Class vs Helper Method (CRITICAL)

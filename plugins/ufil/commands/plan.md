@@ -106,7 +106,7 @@ Based on the issue and project type, explore relevant parts:
 - `packages/presentation/feature_<feature>/` — existing blocs, pages, widgets
 - `app/lib/injector.dart` — config wiring
 - `app/lib/app_router.dart` — route registration
-- `melos.yaml` / workspace — package list
+- root `pubspec.yaml` — `workspace:` list (package paths) and `melos:` scripts
 
 **Single-module projects** — check:
 - `lib/features/<feature>/domain/` — models, repos, usecases
