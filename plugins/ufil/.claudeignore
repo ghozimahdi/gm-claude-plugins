@@ -24,7 +24,6 @@ pubspec.lock
 # Binary assets
 assets/icons/
 assets/images/
-assets/colors/
 assets/fonts/
 
 # IDE files
