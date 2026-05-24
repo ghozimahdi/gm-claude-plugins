@@ -7,7 +7,7 @@ Supports both **modular** (multi-package + melos) and **single-module** project 
 
 - **3 Agents**: Architect, Implementer, Reviewer
 - **8 Skills**: clean-architecture, bloc-pattern, testing-conventions, melos, auto-route, injectable-di, freezed, flutter-performance
-- **18 Commands**: init-project, generate-module, create-bloc, build, check, test, plan, implement, implement-batch, ship, review, write-test, commit, create-pr, rtk-activate, rtk-deactivate, rtk-status, serena-refresh
+- **19 Commands**: init-project, generate-module, create-bloc, build, check, test, plan, implement, implement-batch, ship, review, write-test, commit, create-pr, rtk-activate, rtk-deactivate, rtk-status, serena-refresh, keep-alive
 - **Team Config**: `.claude-plugin/team-config.json` — thresholds + max parallel agents. `/implement` auto-detects ticket scope and switches to team mode (architect → parallel implementers in worktrees) when thresholds are exceeded. Tune without editing command files.
 - **Hooks**: Auto dart fix + format + analyze before git commit
 - **MCP Servers**: Dart & Flutter MCP Server + Serena LSP (auto-onboards on first `/plan`, `/implement`, or `/implement-batch` when Dart code is detected; manual refresh via `/serena-refresh`)

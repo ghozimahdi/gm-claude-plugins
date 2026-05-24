@@ -27,7 +27,7 @@ Supports both **modular** (multi-package + melos) and **single-module** project 
 | `freezed`             | Model, DTO, state, event, failure, params patterns                 |
 | `flutter-performance` | Const class vs helper, isolate vs compute, ListView optimization   |
 
-### Commands (16)
+### Commands (17)
 
 | Command             | Description                                                       |
 | ------------------- | ----------------------------------------------------------------- |
@@ -47,6 +47,7 @@ Supports both **modular** (multi-package + melos) and **single-module** project 
 | `/rtk-activate`     | Install RTK's global Claude Code hook (`rtk init -g`)             |
 | `/rtk-deactivate`   | Remove RTK's global Claude Code hook (`rtk init -g --uninstall`)  |
 | `/rtk-status`       | Show RTK binary version + whether the hook is currently active    |
+| `/keep-alive`       | Prevent macOS from auto-sleeping (toggle on/off/status)           |
 
 ### Hooks
 
