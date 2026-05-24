@@ -84,13 +84,14 @@ gm-claude-plugins/
 
 ### Branch Naming
 
-Use descriptive branch names with a prefix:
+Use descriptive branch names with a `<type>/<plugin>/<description>` format. Include the plugin name so the scope is clear in a multi-plugin repo. For repo-wide changes (root README, CONTRIBUTING, marketplace.json), omit the plugin segment.
 
 ```
-feat/add-riverpod-skill
-fix/generate-module-path-issue
-docs/update-architecture-guide
-refactor/simplify-commit-command
+feat/ufil/add-riverpod-skill
+fix/ufil/generate-module-path-issue
+docs/rubyku/clarify-hotwire-guide
+refactor/rubyku/simplify-commit-command
+docs/update-root-readme
 ```
 
 ### Commit Messages
