@@ -10,18 +10,46 @@ Thanks for your interest in improving **GM Claude Plugins**! Contributions are w
    git clone https://github.com/<your-username>/gm-claude-plugins.git
    cd gm-claude-plugins
    ```
-3. Create a **feature branch** from `main`:
+3. Create a **feature branch** from `main` using the `<type>/<plugin>/<description>` format (see [Branch Naming](#branch-naming)):
    ```bash
-   git checkout -b feat/your-feature-name
+   git checkout -b feat/ufil/your-feature-name
    ```
 4. Make your changes
 5. **Push** to your fork:
    ```bash
-   git push origin feat/your-feature-name
+   git push origin feat/ufil/your-feature-name
    ```
 6. Open a **Pull Request** against this repository's `main` branch
 
 > **Important**: Do NOT push directly to this repository. All changes must go through fork + PR.
+
+## Keeping Your Fork in Sync
+
+Because contributions go through forks, your fork will drift from this repo as new PRs are merged. Sync it before starting a new branch (and before opening a PR) so your changes apply cleanly.
+
+1. **Add the upstream remote** (one time, right after cloning):
+   ```bash
+   git remote add upstream https://github.com/ghozimahdi/gm-claude-plugins.git
+   git remote -v   # verify: origin = your fork, upstream = this repo
+   ```
+
+2. **Sync `main` with upstream** before creating a new feature branch:
+   ```bash
+   git checkout main
+   git fetch upstream
+   git rebase upstream/main
+   git push origin main
+   ```
+
+3. **Rebase your feature branch onto the latest `main`** before opening or updating a PR:
+   ```bash
+   git checkout feat/ufil/your-feature-name
+   git fetch upstream
+   git rebase upstream/main
+   git push --force-with-lease origin feat/ufil/your-feature-name
+   ```
+
+> Use `--force-with-lease` (not `--force`) when re-pushing a rebased branch — it refuses to overwrite work you haven't seen yet. Only force-push branches on your fork, never `main`.
 
 ## What You Can Contribute
 
