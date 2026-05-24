@@ -8,13 +8,13 @@ Each plugin comes with opinionated rules, automated tooling, and AI-powered agen
 
 ## Available Plugins
 
-| Plugin                    | Platform     | Description                                                                                                      |
-| ------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------- |
-| [**ufil**](plugins/ufil/) | Flutter/Dart | UFIL (Ultimate Flutter Intelligent Layer) — Clean Architecture + Modularization with Dart MCP & LSP integration  |
-| *Coming soon*             | React Native | TBD                                                                                                              |
-| *Coming soon*             | Kotlin       | TBD                                                                                                              |
-| *Coming soon*             | Express      | TBD                                                                                                              |
-| *Coming soon*             | Ruby         | TBD                                                                                                              |
+| Plugin                          | Platform     | Description                                                                                                      |
+| ------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------- |
+| [**ufil**](plugins/ufil/)       | Flutter/Dart | UFIL (Ultimate Flutter Intelligent Layer) — Clean Architecture + Modularization with Dart MCP & LSP integration  |
+| [**rubyku**](plugins/rubyku/)   | Ruby/Rails   | Rails 8 development — Rails Way architecture, Hotwire-first frontend, Serena LSP for Ruby code intelligence      |
+| *Coming soon*                   | React Native | TBD                                                                                                              |
+| *Coming soon*                   | Kotlin       | TBD                                                                                                              |
+| *Coming soon*                   | Express      | TBD                                                                                                              |
 
 ## What Makes These Plugins Different
 
