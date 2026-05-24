@@ -38,9 +38,11 @@ Thanks for your interest in improving **GM Claude Plugins**! Contributions are w
 ```
 gm-claude-plugins/
 ├── .claude-plugin/
-│   └── marketplace.json      # Marketplace listing (all plugins)
+│   └── marketplace.json        # Marketplace listing (all plugins)
 ├── plugins/
-│   └── ufil/                 # UFIL — Flutter Clean Architecture plugin
+│   ├── ufil/                   # UFIL — Flutter Clean Architecture plugin
+│   ├── rubyku/                 # Rubyku — Rails 8 plugin
+│   └── <your-plugin>/          # Each plugin follows the same layout:
 │       ├── .claude-plugin/
 │       │   └── plugin.json
 │       ├── CLAUDE.md
@@ -76,6 +78,7 @@ gm-claude-plugins/
      "version": "1.0.0"
    }
    ```
+3. Add a row for your plugin in the **Available Plugins** table of the root [`README.md`](README.md).
 
 ## Guidelines
 
@@ -92,12 +95,13 @@ refactor/simplify-commit-command
 
 ### Commit Messages
 
-Follow [Conventional Commits](https://www.conventionalcommits.org/):
+Follow [Conventional Commits](https://www.conventionalcommits.org/). Use the plugin name as the scope:
 
 ```
 feat(ufil): add riverpod skill for non-bloc projects
-fix(ufil): correct modular domain model path in generate-module
+fix(rubyku): correct controller path in generate-migration
 docs(ufil): clarify DTO naming convention in DATA_LAYER.md
+chore: update root README with new plugin
 ```
 
 ### Pull Request
@@ -119,11 +123,12 @@ docs(ufil): clarify DTO naming convention in DATA_LAYER.md
 1. Install the plugin locally:
    ```bash
    /plugin marketplace add /path/to/your-fork
-   /plugin install ufil@gm-claude-plugins
+   /plugin install <plugin-name>@gm-claude-plugins
    /reload-plugins
    ```
-2. Test in a real Flutter project to verify skills, commands, and agents work correctly
-3. If you modified `generate-module.sh`, test both `--modular` and `--single` modes
+   Example: `/plugin install ufil@gm-claude-plugins` or `/plugin install rubyku@gm-claude-plugins`.
+2. Test in a real project for the target platform to verify skills, commands, and agents work correctly.
+3. If you touched plugin-specific scripts (e.g. `ufil/scripts/generate-module.sh`), test every mode the script supports (e.g. `--modular` and `--single`).
 
 ## Contact
 
