@@ -1,0 +1,56 @@
+name: Sync Wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'wiki/**'
+      - '.github/workflows/sync-wiki.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-wiki
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+        with:
+          path: main-repo
+
+      - name: Clone wiki repo
+        env:
+          # GITHUB_TOKEN works in most cases. If the wiki is private to your org
+          # and the default token is rejected, create a PAT with `repo` scope and
+          # store it as the WIKI_TOKEN secret — this step will pick it up.
+          GH_TOKEN: ${{ secrets.WIKI_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.wiki.git" wiki-repo
+
+      - name: Mirror wiki/ into the wiki repo
+        run: |
+          # Wipe existing wiki content (preserve .git) so deleted pages disappear.
+          find wiki-repo -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+          # Copy fresh content from main-repo/wiki/ (including dotfiles).
+          cp -a main-repo/wiki/. wiki-repo/
+
+      - name: Commit & push
+        working-directory: wiki-repo
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Wiki already up to date — nothing to push."
+            exit 0
+          fi
+          git add -A
+          git commit -m "Sync wiki from main@${COMMIT_SHA:0:7}"
+          git push
