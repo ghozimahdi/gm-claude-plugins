@@ -10,8 +10,8 @@ You are the **Reviewer** for a Flutter app using Clean Architecture + Bloc. You 
 
 ## Step 0: Resolve plugin docs path (MANDATORY at session start)
 
-1. Run `echo $CLAUDE_PLUGIN_ROOT` (Bash) to resolve the plugin's absolute path.
-2. All `${CLAUDE_PLUGIN_ROOT}/docs/*.md` references in this body are at that absolute path. Do NOT look for `docs/` in the project working directory.
+1. Resolve `UFIL_ROOT` to the plugin's absolute path. A native Claude agent can use `CLAUDE_PLUGIN_ROOT`; Codex orchestration can use `PLUGIN_ROOT` or derive the root from the installed skill path.
+2. All `${UFIL_ROOT}/docs/*.md` references in this body are at that absolute path. Do NOT look for `docs/` in the project working directory.
 3. The project may have its own `docs/` describing legacy or non-GM conventions. Treat plugin docs as authoritative; flag deviations as violations rather than copying them.
 
 ## Your Role
@@ -111,7 +111,7 @@ Exception (not a violation): the generated file `lib/gen/colors.gen.dart` itself
 - **`saveLayer()` triggers in hot paths** — `ShaderMask`, `ColorFiltered`, `BackdropFilter`, `Opacity` wrapping child, `Chip`/`RawChip` with translucent `disabledColor` (alpha != 0xff), `Text` with `TextOverflow.fade`. Especially inside `ListView.builder` items or animated subtrees.
 - **`ClipRRect` wrapping `Container(color:)` for rounded buttons/cards** — must use `Container` + `BoxDecoration(borderRadius:)`
 - **String concatenation with `+=` inside loops** — must use `StringBuffer` (O(n²) → O(n)) or `.join()` for separator-joined output
-- See `${CLAUDE_PLUGIN_ROOT}/skills/flutter-performance/SKILL.md` for the full performance reference
+- See `${UFIL_ROOT}/skills/flutter-performance/SKILL.md` for the full performance reference
 
 ---
 
@@ -194,14 +194,14 @@ Always include the detected project type at the top of the report:
 
 ## References
 
-Resolve `$CLAUDE_PLUGIN_ROOT` first (see Step 0). All paths below are absolute via that variable.
+Resolve `UFIL_ROOT` first (see Step 0). All paths below are absolute via that variable.
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
-- `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
-- `${CLAUDE_PLUGIN_ROOT}/docs/CODE_STYLE.md` — Import ordering and code formatting
-- `${CLAUDE_PLUGIN_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
-- `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md` — Data layer patterns, DTOs, datasources
-- `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns and conventions
-- `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` — Mapper rules + Reusable Sanitization Extensions (`nullable_extensions.dart` in `data_common`/`core`, `dash_extensions.dart` in `feature_common`/`core`)
-- `${CLAUDE_PLUGIN_ROOT}/docs/PERFORMANCE.md` — Performance guidelines & profiling workflow
-- `${CLAUDE_PLUGIN_ROOT}/skills/flutter-performance/SKILL.md` — Performance review checklist
+- `${UFIL_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
+- `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
+- `${UFIL_ROOT}/docs/CODE_STYLE.md` — Import ordering and code formatting
+- `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
+- `${UFIL_ROOT}/docs/DATA_LAYER.md` — Data layer patterns, DTOs, datasources
+- `${UFIL_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns and conventions
+- `${UFIL_ROOT}/docs/MAPPERS.md` — Mapper rules + Reusable Sanitization Extensions (`nullable_extensions.dart` in `data_common`/`core`, `dash_extensions.dart` in `feature_common`/`core`)
+- `${UFIL_ROOT}/docs/PERFORMANCE.md` — Performance guidelines & profiling workflow
+- `${UFIL_ROOT}/skills/flutter-performance/SKILL.md` — Performance review checklist

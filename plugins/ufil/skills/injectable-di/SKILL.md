@@ -1,8 +1,11 @@
 ---
 name: injectable-di
 description: "GM Injectable DI patterns — modular (per-package di.dart + Config class) vs non-modular (single injector.dart)"
-disable-model-invocation: true
 ---
+
+Resolve `UFIL_ROOT` to the plugin root containing this skill. Claude Code may
+provide `CLAUDE_PLUGIN_ROOT`; Codex can resolve it from the installed skill
+path.
 
 ## Injectable / GetIt DI Patterns (GM Standard)
 
@@ -259,4 +262,4 @@ MultiBlocProvider(
 
 ### References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
+- `${UFIL_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module

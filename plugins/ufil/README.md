@@ -1,12 +1,12 @@
 # UFIL (Ultimate Flutter Intelligent Layer)
 
-A Claude Code plugin for Flutter Clean Architecture + Modularization with Dart MCP & LSP integration.
+A Claude Code and Codex plugin for Flutter Clean Architecture + Modularization with Dart MCP integration.
 
 Supports both **modular** (multi-package + melos) and **single-module** project structures.
 
 ## What's Included
 
-### Agents (3)
+### Claude Code Agents (3)
 
 | Agent            | Role                                                | Model  |
 | ---------------- | --------------------------------------------------- | ------ |
@@ -14,7 +14,14 @@ Supports both **modular** (multi-package + melos) and **single-module** project 
 | `gm-implementer` | Writes production code following standards          | Sonnet |
 | `gm-reviewer`    | Reviews code for architecture violations            | Sonnet |
 
-### Skills (8)
+### Shared Skills (23)
+
+UFIL exposes the same skills to both clients:
+
+- Claude Code: `/ufil:<skill> [arguments]`
+- Codex: `$ufil:<skill> [arguments]`
+
+Architecture and convention skills:
 
 | Skill                 | Description                                                       |
 | --------------------- | ----------------------------------------------------------------- |
@@ -27,40 +34,48 @@ Supports both **modular** (multi-package + melos) and **single-module** project 
 | `freezed`             | Model, DTO, state, event, failure, params patterns                 |
 | `flutter-performance` | Const class vs helper, isolate vs compute, ListView optimization   |
 
-### Commands (17)
+Workflow skills:
 
-| Command             | Description                                                       |
+| Skill               | Description                                                       |
 | ------------------- | ----------------------------------------------------------------- |
-| `/init-project`     | Scaffold new project (modular or single-module)                   |
-| `/generate-module`  | Generate feature module (domain/data/presentation)                |
-| `/create-bloc`      | Create a BLoC (3 files: bloc/event/state)                         |
-| `/build`            | Run code generation (freezed, injectable, auto_route, etc.)       |
-| `/check`            | Static analysis + formatting before commit                        |
-| `/test`             | Run tests and report results                                      |
-| `/implement`        | Implement a feature following clean architecture                  |
-| `/implement-batch`  | Implement multiple features in parallel (auto-scales agents)      |
-| `/commit`           | Git commit with Conventional Commits (feat, fix, chore, etc.)     |
-| `/create-pr`        | Create GitHub PR with structured summary and test plan            |
-| `/ship`             | Tests + review + commit + PR (full pipeline)                      |
-| `/review`           | Audit codebase for architecture violations                        |
-| `/write-test`       | Write tests for a feature or file                                 |
-| `/rtk-activate`     | Install RTK's global Claude Code hook (`rtk init -g`)             |
-| `/rtk-deactivate`   | Remove RTK's global Claude Code hook (`rtk init -g --uninstall`)  |
-| `/rtk-status`       | Show RTK binary version + whether the hook is currently active    |
-| `/keep-alive`       | Prevent macOS from auto-sleeping (toggle on/off/status)           |
+| `init-project`      | Scaffold new project (modular or single-module)                   |
+| `generate-module`   | Generate feature module (domain/data/presentation)                |
+| `create-bloc`       | Create a BLoC (3 files: bloc/event/state)                         |
+| `build`             | Run code generation (freezed, injectable, auto_route, etc.)       |
+| `check`             | Static analysis + formatting before commit                        |
+| `test`              | Run tests and report results                                      |
+| `plan`              | Plan an issue and save it under the target project's `.ufil/`     |
+| `implement`         | Implement a feature following clean architecture                  |
+| `implement-batch`   | Implement multiple features in parallel                           |
+| `commit`            | Git commit with Conventional Commits                              |
+| `create-pr`         | Create GitHub PR with structured summary and test plan            |
+| `ship`              | Tests + review + commit + PR                                      |
+| `review`            | Audit codebase for architecture violations                        |
+| `write-test`        | Write tests for a feature or file                                 |
+| `serena-refresh`    | Rebuild Serena's project-specific semantic index                  |
+| `keep-alive`        | Prevent macOS from auto-sleeping (toggle on/off/status)           |
+
+### Claude-only RTK Commands
+
+RTK manages Claude Code's global Bash hook, so these stay Claude-specific:
+
+- `/ufil:rtk-status`
+- `/ufil:rtk-activate`
+- `/ufil:rtk-deactivate`
 
 ### Hooks
 
 - **Pre-commit**: Auto-runs `fvm dart fix --apply` + `fvm dart format` + `fvm dart analyze` before every git commit
 - **Post-edit**: Reminds to analyze after editing .dart files
-- **SessionStart**: Auto-installs and initializes [rtk-ai/rtk](https://github.com/rtk-ai/rtk) — a CLI proxy that wraps shell commands run via Claude Code's Bash tool to cut LLM token usage 60-90% on `git`, `flutter`, `dart`, `melos`, etc.
+- **Serena lifecycle**: Activates the current project and keeps its index in sync in both clients
+- **Claude SessionStart**: Auto-installs and initializes [rtk-ai/rtk](https://github.com/rtk-ai/rtk). The installer intentionally skips Codex because RTK configures Claude's global Bash hook.
 
 ### MCP Servers
 
 - **Dart & Flutter MCP Server**: pub.dev search, error analysis, dependency management
 - **Serena**: LSP intelligence — go-to-definition, find references, symbols
 
-### LSP Server
+### Claude Code LSP Server
 
 - **Dart LSP**: Built-in diagnostics after every edit
 
@@ -102,14 +117,54 @@ project/
 
 ## Installation
 
+### Codex
+
 ```bash
 # From GitHub
-/plugin marketplace add ghozimahdi/gm-claude-plugins
-/plugin install ufil@gm-claude-plugins
+codex plugin marketplace add ghozimahdi/gm-aiagent-plugins
+codex plugin add ufil@gm-aiagent-plugins
+
+# Or from a local clone
+codex plugin marketplace add /absolute/path/to/gm-aiagent-plugins
+codex plugin add ufil@gm-aiagent-plugins
+```
+
+Start a new Codex conversation after installation so its skills, hooks, and MCP
+tools are loaded. Invoke workflows with `$ufil:<skill>`, for example:
+
+```text
+$ufil:init-project my_app --package com.example.app --modular
+$ufil:plan 123
+$ufil:implement 123
+```
+
+Codex consumes the shared workflow skills directly. The three Claude agent
+definitions are also usable as role guidance by orchestration skills, although
+they are not registered as named Codex agents. Claude's Dart LSP configuration
+and RTK global-hook commands remain Claude-only.
+
+UFIL keeps client-specific MCP launch settings: `.mcp.json` uses Serena's
+`claude-code` context, while the native Codex manifest embeds its `codex`
+context and resolves the project from Codex's working directory.
+
+### Claude Code
+
+```bash
+# From GitHub
+/plugin marketplace add ghozimahdi/gm-aiagent-plugins
+/plugin install ufil@gm-aiagent-plugins
 
 # Or local plugin directory
 cd /path/to/your-flutter-project
-claude --plugin-dir /path/to/gm-claude-plugins/plugins/ufil
+claude --plugin-dir /path/to/gm-aiagent-plugins/plugins/ufil
+```
+
+Invoke workflows with the plugin-qualified skill name:
+
+```text
+/ufil:init-project my_app --package com.example.app --modular
+/ufil:plan 123
+/ufil:implement 123
 ```
 
 ## Standards Enforced
@@ -139,7 +194,7 @@ This plugin **auto-detects all versions** at project creation time — zero hard
 - Dart SDK 3.6+ (for pub workspaces / melos 7.x)
 - Flutter SDK managed through FVM
 - Serena (`pip install serena` or `uvx serena`) — for LSP intelligence
-- **RTK** — auto-installed on first session
+- **RTK** (optional, Claude Code only) — auto-installed on first Claude session
 
 ## Contributing
 

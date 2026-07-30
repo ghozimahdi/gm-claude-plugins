@@ -1,13 +1,18 @@
 ---
+name: plan
 description: "Analyze a GitHub issue/ticket and create a Flutter implementation plan markdown before coding."
-argument-hint: "<issue-id>"
-allowed-tools: ["Read", "Write", "Bash", "Glob", "Grep", "Agent"]
-model: opus
 ---
+
+Use the current user request as this skill's input. In Claude Code invoke it as
+`/ufil:plan`; in Codex invoke it as `$ufil:plan`. Resolve `UFIL_ROOT` to the
+plugin root containing this skill; Claude Code may provide
+`CLAUDE_PLUGIN_ROOT`, while Codex can resolve it from the installed skill path.
+Use the client's native subagent capability; do not hardcode one client's tool
+call schema.
 
 Analyze a GitHub issue/ticket and create a detailed Flutter implementation plan BEFORE coding.
 
-Arguments: $ARGUMENTS (GitHub issue ID, e.g., `123` or `issues/123`)
+Arguments: <requested arguments> (GitHub issue ID, e.g., `123` or `issues/123`)
 
 ## Step 0: Initialize Serena + Read docs (MANDATORY)
 
@@ -20,10 +25,10 @@ Run in order:
 3. **If not onboarded:**
    - Probe for analyzable code: `find . -maxdepth 3 -type f -name '*.dart' -not -path '*/.*' | head -1`
    - If a Dart file is found → call `mcp__serena__onboarding` to build the symbol index and project memories (one-time cost per project).
-   - If empty → SKIP onboarding, fall back to Glob/Grep/Read. Inform the user: "Serena onboarding skipped — no Dart code detected. Will auto-run the next time /plan or /implement is invoked after code exists."
+   - If empty → SKIP onboarding, fall back to built-in search and read tools. Inform the user: "Serena onboarding skipped — no Dart code detected. Will auto-run the next time the plan or implement workflow is invoked after code exists."
 4. **If already onboarded:** proceed.
 
-Use Serena tools throughout planning for code exploration and symbol lookup. To force re-onboarding (e.g. after a major refactor), run `/serena-refresh`.
+Use Serena tools throughout planning for code exploration and symbol lookup. To force re-onboarding after a major refactor, invoke the `serena-refresh` skill.
 
 ### 0b. Project Type Detection
 
@@ -32,15 +37,15 @@ Use Serena tools throughout planning for code exploration and symbol lookup. To 
 
 ### 0c. Read plugin docs
 
-Read from `${CLAUDE_PLUGIN_ROOT}/docs/` (resolve via `echo $CLAUDE_PLUGIN_ROOT` first):
+Read from `${UFIL_ROOT}/docs/`:
 
-1. `${CLAUDE_PLUGIN_ROOT}/docs/ARCHITECTURE.md`
-2. `${CLAUDE_PLUGIN_ROOT}/docs/NAMING_CONVENTIONS.md`
-3. `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md`
-4. `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md`
-5. `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md`
-6. `${CLAUDE_PLUGIN_ROOT}/docs/PRESENTATION_LAYER.md`
-7. `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md`
+1. `${UFIL_ROOT}/docs/ARCHITECTURE.md`
+2. `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md`
+3. `${UFIL_ROOT}/docs/BLOC_PATTERN.md`
+4. `${UFIL_ROOT}/docs/DOMAIN_LAYER.md`
+5. `${UFIL_ROOT}/docs/DATA_LAYER.md`
+6. `${UFIL_ROOT}/docs/PRESENTATION_LAYER.md`
+7. `${UFIL_ROOT}/docs/MAPPERS.md`
 
 Also read relevant project guidelines from `docs/` in the working directory (if present).
 
@@ -67,7 +72,7 @@ Use these to:
 
 ### 1. Fetch & understand the issue
 
-Extract issue ID from `$ARGUMENTS` (strip `issues/` prefix if present, strip `#` prefix).
+Extract issue ID from `<requested arguments>` (strip `issues/` prefix if present, strip `#` prefix).
 
 Detect the GitHub repo from the local git remote, then fetch:
 
@@ -85,7 +90,7 @@ Read and understand:
 
 If the issue references other issues or PRs, fetch those too for context.
 
-### 2. Scope estimation (feeds Step 1.5 of `/implement`)
+### 2. Scope estimation (feeds Step 1.5 of the `implement` skill)
 
 From the issue, count:
 - `pages` — distinct screens to build
@@ -94,7 +99,7 @@ From the issue, count:
 - `features` — distinct feature modules touched
 - `estimatedFiles` — rough total (models + DTOs + mappers + repos + datasources + blocs + pages + events + states + tests)
 
-Record these in the plan so `/implement` can decide single-agent vs team mode from `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/team-config.json` without recounting.
+Record these in the plan so the `implement` skill can decide single-agent vs team mode from `${UFIL_ROOT}/config/team-config.json` without recounting.
 
 ### 3. Explore the codebase
 
@@ -116,21 +121,19 @@ Based on the issue and project type, explore relevant parts:
 - `lib/injector.dart` — DI registration
 - `lib/app_router.dart` — routes
 
-Use the **gm-architect** agent for complex architecture decisions or when planning a feature with 3+ pages or 3+ usecases.
+For complex architecture decisions or a feature with 3+ pages or 3+ use cases, read `${UFIL_ROOT}/agents/architect.md` as role guidance. Use the Claude `gm-architect` agent or a general Codex subagent with that guidance.
 
 ### 4. Create the plan
 
-Resolve the plugin root first: `echo $CLAUDE_PLUGIN_ROOT`
-
-Create a plan markdown file inside the **plugin directory** (NOT the project directory):
+Create a plan markdown file inside the target project's UFIL workspace:
 
 ```
-${CLAUDE_PLUGIN_ROOT}/docs/plans/issue-<issue_id>.md
+.ufil/plans/issue-<issue_id>.md
 ```
 
-If `${CLAUDE_PLUGIN_ROOT}/docs/plans/` doesn't exist, create it.
+If `.ufil/plans/` doesn't exist, create it.
 
-**IMPORTANT**: Plans live in the plugin directory so they persist across sessions and are picked up by `/implement`.
+Plans live in the target project so they remain writable after marketplace installation and are picked up by both clients' `implement` skill.
 
 ### Plan Template
 
@@ -163,7 +166,7 @@ The plan MUST follow this structure:
 | features | N |
 | estimatedFiles | N |
 
-> Used by `/implement` Step 1.5 to decide single-agent vs team mode.
+> Used by the `implement` skill Step 1.5 to decide single-agent vs team mode.
 
 ## Analysis
 
@@ -283,18 +286,19 @@ The plan MUST follow this structure:
 
 After creating the file, display:
 - The full plan to the user
-- The file path: `${CLAUDE_PLUGIN_ROOT}/docs/plans/issue-<issue_id>.md`
+- The file path: `.ufil/plans/issue-<issue_id>.md`
 - Ask if the plan looks good or needs adjustments
 
 Tell the user:
 ```
-Plan saved to ${CLAUDE_PLUGIN_ROOT}/docs/plans/issue-<issue_id>.md
+Plan saved to .ufil/plans/issue-<issue_id>.md
 
 When ready to implement, run:
-  /implement <issue_id>
+  Claude Code: /ufil:implement <issue_id>
+  Codex: $ufil:implement <issue_id>
 
-`/implement` will load this plan and use the Scope Estimate to decide
-single-agent vs team mode (per .claude-plugin/team-config.json).
+The `implement` skill will load this plan and use the Scope Estimate to decide
+single-agent vs team mode (per config/team-config.json).
 ```
 
 ## Important Rules
@@ -310,11 +314,11 @@ single-agent vs team mode (per .claude-plugin/team-config.json).
 
 ## References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview
-- `${CLAUDE_PLUGIN_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming
-- `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md` — Domain patterns
-- `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md` — Data patterns
-- `${CLAUDE_PLUGIN_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation patterns
-- `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
-- `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` — Mapper rules
-- `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/team-config.json` — team mode thresholds
+- `${UFIL_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview
+- `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming
+- `${UFIL_ROOT}/docs/DOMAIN_LAYER.md` — Domain patterns
+- `${UFIL_ROOT}/docs/DATA_LAYER.md` — Data patterns
+- `${UFIL_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation patterns
+- `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
+- `${UFIL_ROOT}/docs/MAPPERS.md` — Mapper rules
+- `${UFIL_ROOT}/config/team-config.json` — team mode thresholds

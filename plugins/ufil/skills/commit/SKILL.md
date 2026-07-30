@@ -1,13 +1,16 @@
 ---
+name: commit
 description: "Create a git commit using Conventional Commits format with ticket ID."
-argument-hint: "[message or leave empty for auto-detect]"
-allowed-tools: ["Bash", "Read", "Glob", "Grep"]
-model: haiku
 ---
+
+Use the current user request as this skill's input. In Claude Code invoke it as
+`/ufil:commit`; in Codex invoke it as `$ufil:commit`. Resolve `UFIL_ROOT` to the
+plugin root containing this skill; Claude Code may provide
+`CLAUDE_PLUGIN_ROOT`, while Codex can resolve it from the installed skill path.
 
 Create a git commit using **Conventional Commits** format with ticket ID.
 
-Arguments: $ARGUMENTS (optional commit message or scope hint)
+Arguments: <requested arguments> (optional commit message or scope hint)
 
 ## Commit Format
 
@@ -37,7 +40,7 @@ Arguments: $ARGUMENTS (optional commit message or scope hint)
 
 - **Required** — every commit must include the ticket ID (JIRA/Linear/GitHub Issue)
 - Extract from current branch name if branch is named with ticket ID (e.g., `PROP-123`)
-- If `$ARGUMENTS` contains a ticket ID, use it
+- If `<requested arguments>` contains a ticket ID, use it
 - Ask the user if no ticket ID can be determined
 
 ### Examples
@@ -69,7 +72,7 @@ test (PROP-404): add bloc tests for detail page
 
 ### 3. Determine commit type and ticket ID
 
-- Auto-detect type from the changes if no `$ARGUMENTS` provided:
+- Auto-detect type from the changes if no `<requested arguments>` provided:
   - New files in `features/` or new entity/bloc/page -> `feat`
   - Modified existing logic to fix behavior -> `fix`
   - Restructured without behavior change -> `refactor`
@@ -77,7 +80,7 @@ test (PROP-404): add bloc tests for detail page
   - Only pubspec.yaml / dependency changes -> `chore`
   - Only docs/comments -> `docs`
 - Extract ticket ID from branch name (e.g., branch `PROP-123` -> ticket `PROP-123`)
-- If `$ARGUMENTS` is provided, use it as the description (still auto-detect type if not specified)
+- If `<requested arguments>` is provided, use it as the description (still auto-detect type if not specified)
 
 ### 4. Write commit message
 
@@ -97,5 +100,5 @@ test (PROP-404): add bloc tests for detail page
 
 ## References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/COMMIT_CONVENTION.md` — Full commit message format and rules
-- `${CLAUDE_PLUGIN_ROOT}/docs/BRANCHING.md` — Git branching strategy
+- `${UFIL_ROOT}/docs/COMMIT_CONVENTION.md` — Full commit message format and rules
+- `${UFIL_ROOT}/docs/BRANCHING.md` — Git branching strategy

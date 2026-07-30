@@ -1,9 +1,12 @@
 ---
+name: check
 description: "Run static analysis and formatting to ensure code quality. Use before committing."
-argument-hint: ""
-allowed-tools: ["Bash", "Read", "Edit", "Glob", "Grep"]
-model: haiku
 ---
+
+Use the current user request as this skill's input. In Claude Code invoke it as
+`/ufil:check`; in Codex invoke it as `$ufil:check`. Resolve `UFIL_ROOT` to the
+plugin root containing this skill; Claude Code may provide
+`CLAUDE_PLUGIN_ROOT`, while Codex can resolve it from the installed skill path.
 
 Run static analysis and formatting to ensure code quality.
 
@@ -17,4 +20,4 @@ Report the result — zero issues expected.
 
 ## References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/CODE_STYLE.md` — Import ordering and code formatting
+- `${UFIL_ROOT}/docs/CODE_STYLE.md` — Import ordering and code formatting

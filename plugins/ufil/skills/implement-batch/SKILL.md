@@ -1,13 +1,18 @@
 ---
+name: implement-batch
 description: "Implement multiple features in parallel using multiple agents. Auto-scales based on task count."
-argument-hint: "<feature1> <feature2> [feature3...]"
-allowed-tools:
-  ["Read", "Edit", "Write", "Bash", "Glob", "Grep", "Agent", "Skill"]
 ---
+
+Use the current user request as this skill's input. In Claude Code invoke it as
+`/ufil:implement-batch`; in Codex invoke it as `$ufil:implement-batch`. Resolve
+`UFIL_ROOT` to the plugin root containing this skill; Claude Code may provide
+`CLAUDE_PLUGIN_ROOT`, while Codex can resolve it from the installed skill path.
+Use the client's native subagent capability; do not hardcode one client's tool
+call schema.
 
 Implement multiple features in parallel using auto-scaled agents.
 
-Arguments: $ARGUMENTS (space-separated feature names or ticket IDs)
+Arguments: <requested arguments> (space-separated feature names or ticket IDs)
 
 ## Step -1: Initialize Serena (auto-onboard if needed)
 
@@ -18,10 +23,10 @@ Run in order at session start, BEFORE spawning any agents:
 3. **If not onboarded:**
    - Probe for code: `find . -maxdepth 3 -type f -name '*.dart' -not -path '*/.*' | head -1`
    - If a Dart file is found → call `mcp__serena__onboarding` (one-time per project).
-   - If empty → SKIP onboarding; tell the user: "Serena onboarding skipped — no Dart code detected. Will auto-run on the next /implement-batch once code exists." Sub-agents will fall back to Glob/Grep/Read.
+   - If empty → SKIP onboarding; tell the user: "Serena onboarding skipped — no Dart code detected. Will auto-run on the next implement-batch workflow once code exists." Subagents will fall back to built-in search and read tools.
 4. **If already onboarded:** proceed.
 
-Onboarding must happen BEFORE parallel agents spawn — each gm-implementer agent should inherit a ready symbol index, not race to onboard concurrently. To force re-onboarding, run `/serena-refresh`.
+Onboarding must happen BEFORE parallel agents spawn so they inherit a ready symbol index instead of racing to onboard concurrently. To force re-onboarding, invoke the `serena-refresh` skill.
 
 ## Project Type Detection (MUST DO FIRST)
 
@@ -30,17 +35,17 @@ Onboarding must happen BEFORE parallel agents spawn — each gm-implementer agen
 
 ## Load team config (MUST DO BEFORE PHASE 2)
 
-Run `cat ${CLAUDE_PLUGIN_ROOT}/.claude-plugin/team-config.json` to load:
+Read `${UFIL_ROOT}/config/team-config.json` to load:
 
 - `team.maxParallelAgents` — hard cap on parallel agents (default 3)
-- `team.useWorktreeIsolation` — whether to use `isolation: "worktree"` (default true)
+- `team.useWorktreeIsolation` — whether to use worktree isolation when the client supports it (default true)
 - `team.splitStrategy` — how to split work when streams exceed the cap (default `by-layer-then-feature`)
 
 If the file is missing or malformed, fall back to defaults: `maxParallelAgents=3`, `useWorktreeIsolation=true`, `splitStrategy=by-layer-then-feature`.
 
 ## Phase 1 — Analyze & Plan (Architect)
 
-Use the **gm-architect** agent to:
+Read `${UFIL_ROOT}/agents/architect.md` as role guidance. Use the Claude `gm-architect` agent when available, or spawn a general Codex subagent with that guidance, to:
 
 1. Parse the list of features/tickets from the arguments
 2. For each feature, define: models, DTOs, repos, usecases, blocs, pages
@@ -74,7 +79,7 @@ Based on the number of **independent work streams** from Phase 1 and `team.maxPa
 
 ## Phase 3 — Parallel Implementation
 
-For each work stream, spawn a **gm-implementer** agent with worktree isolation.
+Read `${UFIL_ROOT}/agents/implementer.md` as role guidance. For each work stream, use the Claude `gm-implementer` agent when available, or spawn a general Codex subagent with that guidance. Use worktree isolation when supported and enabled.
 
 Each agent's prompt MUST include:
 
@@ -84,16 +89,12 @@ Each agent's prompt MUST include:
 4. The **implementation order**: domain → data → presentation
 5. Instruction to run code generation and verification after implementation
 
-### Agent Spawn Template
+### Subagent prompt template
 
-For each stream, use the Agent tool with:
+For each stream, use the client's native delegation mechanism with this prompt:
 
 ```
-Agent({
-  description: "Implement <feature_names>",
-  subagent_type: "general-purpose",
-  isolation: "worktree",
-  prompt: "You are implementing Flutter features using Clean Architecture.
+You are implementing Flutter features using Clean Architecture.
 
 Project type: <modular|single-module>
 
@@ -127,11 +128,9 @@ Project type: <modular|single-module>
 - Sub-state freezed unions, never flat bool flags
 - Modular: FailureHandlerMixin, query → Future<Result> (Failure + data), action → Future<Failure>, separate mapper classes
 - Single-module: ErrorMapper + Result<T>
-"
-})
 ```
 
-**IMPORTANT**: Launch all parallel agents in a **single message** with multiple Agent tool calls so they run concurrently.
+Launch independent subagents concurrently. Keep dependent streams sequential.
 
 ## Phase 4 — Merge & Verify
 
@@ -149,14 +148,14 @@ After all agents complete:
 
 ## Phase 4.5 — Auto Review (MANDATORY)
 
-After merge & verify pass, invoke the **gm-reviewer** agent (single instance — reviewer audits the merged result, never run in parallel) to audit ALL files created/modified across every stream:
+After merge & verify pass, read `${UFIL_ROOT}/agents/reviewer.md` as role guidance. Use the Claude `gm-reviewer` agent or one Codex review subagent to audit ALL files created/modified across every stream:
 
 - Architecture violations: page calls UseCase directly (no Bloc), Cubit instead of Bloc, `.toModel()` on DTO, missing separate mapper class, manual `getIt.register*`, `try/catch` in datasource, missing `@JsonKey` on DTO field
 - Naming conventions: `{Action}UseCase`, `{Name}DataSource`, `{Name}ModelMapper`, event suffix `Event`, handler camelCase
 - Bloc compliance: init event present, sub-state unions with 4 variants, error variant carries `Failure`
 - Quality: no `=>` for method bodies, ScreenUtil for sizing, no business logic in pages
 
-**Fix ALL critical and warning issues found.** If an issue is large, re-spawn a gm-implementer agent for that stream's worktree; if small, fix inline.
+**Fix ALL critical and warning issues found.** If an issue is large, delegate it back to an implementation subagent for that stream; if small, fix inline.
 
 ## Phase 4.6 — Final Verify (MANDATORY after review fixes)
 
@@ -181,25 +180,29 @@ Report to user:
 
 ## Examples
 
-```bash
+```text
 # 2 independent features → 2 parallel agents
-/implement-batch tenant payment
+Claude: /ufil:implement-batch tenant payment
+Codex:  $ufil:implement-batch tenant payment
 
 # 3 features → 3 parallel agents
-/implement-batch auth tenant notification
+Claude: /ufil:implement-batch auth tenant notification
+Codex:  $ufil:implement-batch auth tenant notification
 
 # 4 features → 3 agents (batched)
-/implement-batch auth tenant payment notification
+Claude: /ufil:implement-batch auth tenant payment notification
+Codex:  $ufil:implement-batch auth tenant payment notification
 
 # Features with dependency → grouped in same agent
-/implement-batch order order-history
+Claude: /ufil:implement-batch order order-history
+Codex:  $ufil:implement-batch order order-history
 # → 1 agent (order-history depends on order models)
 ```
 
 ## References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview
-- `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns
-- `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md` — Data layer patterns
-- `${CLAUDE_PLUGIN_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer
-- `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` — Bloc patterns
+- `${UFIL_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview
+- `${UFIL_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns
+- `${UFIL_ROOT}/docs/DATA_LAYER.md` — Data layer patterns
+- `${UFIL_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer
+- `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — Bloc patterns

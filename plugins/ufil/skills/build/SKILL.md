@@ -1,9 +1,10 @@
 ---
+name: build
 description: "Run code generation (freezed, injectable, auto_route, envied). Use after adding annotations or modifying annotated code."
-argument-hint: ""
-allowed-tools: ["Bash", "Read", "Glob", "Grep"]
-model: haiku
 ---
+
+Use the current user request as this skill's input. In Claude Code invoke it as
+`/ufil:build`; in Codex invoke it as `$ufil:build`.
 
 Run code generation for the Flutter project.
 

@@ -1,8 +1,11 @@
 ---
 name: clean-architecture
-description: "GM Clean Architecture patterns — modular (Failure + FailureHandlerMixin) vs non-modular (Result<T> + ErrorMapper) for Flutter"
-disable-model-invocation: true
+description: "GM Clean Architecture patterns — modular (Failure + FailureHandlerMixin) vs non-modular (Result plus ErrorMapper) for Flutter"
 ---
+
+Resolve `UFIL_ROOT` to the plugin root containing this skill. Claude Code may
+provide `CLAUDE_PLUGIN_ROOT`; Codex can resolve it from the installed skill
+path.
 
 ## Clean Architecture Patterns (GM Standard)
 
@@ -387,11 +390,11 @@ packages/
 
 ### References
 
-Plugin docs live at `$CLAUDE_PLUGIN_ROOT` (run `echo $CLAUDE_PLUGIN_ROOT` to resolve).
+Plugin docs live under the resolved `UFIL_ROOT`.
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
-- `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns and conventions
-- `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md` — Data layer patterns, DTOs, datasources
-- `${CLAUDE_PLUGIN_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer, pages, widgets
-- `${CLAUDE_PLUGIN_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
-- `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` — Mapper creation rules (apply to BOTH project types)
+- `${UFIL_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
+- `${UFIL_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns and conventions
+- `${UFIL_ROOT}/docs/DATA_LAYER.md` — Data layer patterns, DTOs, datasources
+- `${UFIL_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer, pages, widgets
+- `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
+- `${UFIL_ROOT}/docs/MAPPERS.md` — Mapper creation rules (apply to BOTH project types)

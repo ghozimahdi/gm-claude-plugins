@@ -8,16 +8,16 @@ This repo contains plugin definitions; there's no build/test step for the plugin
 ```bash
 # Quick start (no marketplace)
 cd /path/to/your-flutter-project
-claude --plugin-dir /path/to/gm-claude-plugins/plugins/ufil
+claude --plugin-dir /path/to/gm-aiagent-plugins/plugins/ufil
 
 # Or via local marketplace
-/plugin marketplace add /path/to/gm-claude-plugins
-/plugin install ufil@gm-claude-plugins
+/plugin marketplace add /path/to/gm-aiagent-plugins
+/plugin install ufil@gm-aiagent-plugins
 /reload-plugins                          # after editing plugin files
 
 # From GitHub
-/plugin marketplace add ghozimahdi/gm-claude-plugins
-/plugin install ufil@gm-claude-plugins
+/plugin marketplace add ghozimahdi/gm-aiagent-plugins
+/plugin install ufil@gm-aiagent-plugins
 ```
 
 ### Release a plugin

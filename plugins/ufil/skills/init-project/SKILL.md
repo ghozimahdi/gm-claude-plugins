@@ -1,14 +1,18 @@
 ---
+name: init-project
 description: "Scaffold a new Flutter project with GM clean architecture. Supports modular (multi-package + melos) and single-module structures."
-argument-hint: "<project-name> [--package <com.example.app>] [--modular|--single]"
-allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 ---
+
+Use the current user request as this skill's input. In Claude Code invoke it as
+`/ufil:init-project`; in Codex invoke it as `$ufil:init-project`. Resolve
+`UFIL_ROOT` to the plugin root containing this skill; Claude Code may provide
+`CLAUDE_PLUGIN_ROOT`, while Codex can resolve it from the installed skill path.
 
 Scaffold a new Flutter project with GM clean architecture.
 
 **Prerequisites:** FVM must be installed (`dart pub global activate fvm`) with a global Flutter version set.
 
-**Scripts available at `${CLAUDE_PLUGIN_ROOT}/scripts/`:**
+**Scripts available at `${UFIL_ROOT}/scripts/`:**
 
 - `init-modular.sh <name> [package]` — scaffold modular project (package defaults to `com.example.app`)
 - `init-single.sh <name> [package]` — scaffold single-module project (package defaults to `com.example.app`)
@@ -21,7 +25,7 @@ Scripts auto-detect versions:
 
 Run the appropriate script first, then follow up with manual adjustments below.
 
-Arguments: $ARGUMENTS
+Arguments: <requested arguments>
 
 - `<project-name>` — snake_case project name
 - `--package <com.example.app>` — package/bundle ID (optional, defaults to `com.example.app`)
@@ -51,7 +55,7 @@ If FVM is not installed, instruct the user to install it first.
 Run the script:
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/init-modular.sh <project_name> <package_name>
+bash ${UFIL_ROOT}/scripts/init-modular.sh <project_name> <package_name>
 ```
 
 Creates:
@@ -93,7 +97,7 @@ Creates:
 Run the script:
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/init-single.sh <project_name> <package_name>
+bash ${UFIL_ROOT}/scripts/init-single.sh <project_name> <package_name>
 ```
 
 Creates:
@@ -192,6 +196,6 @@ Creates:
 
 ## References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
-- `${CLAUDE_PLUGIN_ROOT}/docs/VSCODE_SETUP.md` — VS Code auto-generated configuration
-- `${CLAUDE_PLUGIN_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
+- `${UFIL_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
+- `${UFIL_ROOT}/docs/VSCODE_SETUP.md` — VS Code auto-generated configuration
+- `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards

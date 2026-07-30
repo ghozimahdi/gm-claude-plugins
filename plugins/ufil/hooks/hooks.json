@@ -2,11 +2,11 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash(git commit*)",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "fvm dart fix --apply lib 2>&1 && fvm dart format lib test 2>&1 && fvm dart analyze lib test 2>&1"
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/pre-tool-use.sh"
           }
         ]
       },
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/serena-hook.sh remind --client=claude-code"
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/serena-hook.sh remind"
           }
         ]
       },
@@ -24,14 +24,14 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/serena-hook.sh auto-approve --client=claude-code"
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/serena-hook.sh auto-approve"
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "Write|Edit",
+        "matcher": "Write|Edit|apply_patch",
         "hooks": [
           {
             "type": "command",
@@ -46,7 +46,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/install-serena.sh && ${CLAUDE_PLUGIN_ROOT}/scripts/serena-hook.sh activate --client=claude-code"
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/install-serena.sh && ${CLAUDE_PLUGIN_ROOT}/scripts/serena-hook.sh activate"
           },
           {
             "type": "command",
@@ -61,7 +61,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/serena-hook.sh cleanup --client=claude-code"
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/serena-hook.sh cleanup"
           }
         ]
       }

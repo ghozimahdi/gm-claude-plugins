@@ -1,6 +1,6 @@
-# GM Claude Plugins
+# GM Development Plugins
 
-A growing collection of Claude Code plugins for mobile, web & backend development by [Ghozi Mahdi](mailto:ghozi.dev@gmail.com).
+A growing collection of Claude Code and Codex plugins for mobile, web & backend development by [Ghozi Mahdi](mailto:ghozi.dev@gmail.com).
 
 **Focus:** Helping developers write code the right way — enforcing **best practices**, **clean architecture**, **standardized patterns**, and **industry conventions** so every project starts and stays on the right track.
 
@@ -26,22 +26,41 @@ Each plugin comes with opinionated rules, automated tooling, and AI-powered agen
 
 ## Installation
 
+### Claude Code
+
 ```bash
 # 1. Add marketplace (one time)
-/plugin marketplace add ghozimahdi/gm-claude-plugins
+/plugin marketplace add ghozimahdi/gm-aiagent-plugins
 
 # 2. Install any plugin
-/plugin install ufil@gm-claude-plugins
+/plugin install ufil@gm-aiagent-plugins
 ```
+
+### Codex
+
+```bash
+# 1. Add marketplace (one time)
+codex plugin marketplace add ghozimahdi/gm-aiagent-plugins
+
+# 2. Install any plugin
+codex plugin add ufil@gm-aiagent-plugins
+```
+
+After installation, invoke UFIL skills as `/ufil:<skill>` in Claude Code or
+`$ufil:<skill>` in Codex.
+
+Repository maintainers can run the shared release workflow with
+`/release <plugin> [version]` in Claude Code or
+`$release <plugin> [version]` in Codex.
 
 ## Documentation
 
-Plugin-specific docs live next to each plugin. Cross-cutting topics — tools and integrations shared across plugins (Serena MCP, RTK, Dart MCP, hook conventions, etc.) — are documented in the [GitHub Wiki](https://github.com/ghozimahdi/gm-claude-plugins/wiki), which is mirrored from the [`wiki/`](wiki/) folder in this repo via [`.github/workflows/sync-wiki.yml`](.github/workflows/sync-wiki.yml) — edit pages there via a regular PR and they'll be pushed to the Wiki on merge to `main`.
+Plugin-specific docs live next to each plugin. Cross-cutting topics — tools and integrations shared across plugins (Serena MCP, RTK, Dart MCP, hook conventions, etc.) — are documented in the [GitHub Wiki](https://github.com/ghozimahdi/gm-aiagent-plugins/wiki), which is mirrored from the [`wiki/`](wiki/) folder in this repo via [`.github/workflows/sync-wiki.yml`](.github/workflows/sync-wiki.yml) — edit pages there via a regular PR and they'll be pushed to the Wiki on merge to `main`.
 
 If automated sync ever fails, you can push manually:
 
 ```bash
-git clone git@github.com:ghozimahdi/gm-claude-plugins.wiki.git /tmp/gm-wiki
+git clone git@github.com:ghozimahdi/gm-aiagent-plugins.wiki.git /tmp/gm-wiki
 rsync -a --delete --exclude='.git' wiki/ /tmp/gm-wiki/
 cd /tmp/gm-wiki && git add -A && git commit -m "Manual wiki sync" && git push
 ```

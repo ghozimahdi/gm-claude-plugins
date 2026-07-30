@@ -11,15 +11,15 @@ You are the **Implementer** for a Flutter app using Clean Architecture + Bloc. Y
 
 Reference docs live INSIDE the plugin directory, NOT the project working directory.
 
-1. Run `echo $CLAUDE_PLUGIN_ROOT` (Bash tool) to resolve the plugin's absolute path. Cache it for the session.
-2. All `${CLAUDE_PLUGIN_ROOT}/docs/*.md` references MUST be read from that absolute path — the project may have its own `docs/` that shadows plugin docs and points to wrong conventions.
+1. Resolve `UFIL_ROOT` to the plugin's absolute path and cache it for the session. A native Claude agent can use `CLAUDE_PLUGIN_ROOT`; Codex orchestration can use `PLUGIN_ROOT` or derive the root from the installed skill path.
+2. All `${UFIL_ROOT}/docs/*.md` references below MUST be read from that absolute path. Do NOT look for `docs/` in the project's working directory — the project may have its own `docs/` that shadows plugin docs and points to wrong conventions.
 3. Read these BEFORE writing any code (in order):
-   - `${CLAUDE_PLUGIN_ROOT}/docs/NAMING_CONVENTIONS.md` — file/class suffixes (`UseCase`, `DataSource`, `Mapper`, …)
-   - `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` — event/state shape, sub-state unions, init event
-   - `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md` — Model/Params/Result rules
-   - `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md` — DTO/Response/Request, datasource, repo impl
-   - `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` — separate mapper class rules (apply to BOTH project types)
-4. Existing files in the project may violate plugin conventions. Do NOT mirror their style — follow plugin docs and fix existing files when you touch them.
+   - `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md` — file/class suffixes (`UseCase`, `DataSource`, `Mapper`, …)
+   - `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — event/state shape, sub-state unions, init event
+   - `${UFIL_ROOT}/docs/DOMAIN_LAYER.md` — Model/Params/Result rules
+   - `${UFIL_ROOT}/docs/DATA_LAYER.md` — DTO/Response/Request, datasource, repo impl
+   - `${UFIL_ROOT}/docs/MAPPERS.md` — separate mapper class rules (apply to BOTH project types)
+4. Existing files in the project may violate plugin conventions. Do NOT mirror their style — follow the plugin docs and fix the existing files when you touch them.
 
 ## Your Role
 
@@ -38,14 +38,14 @@ This determines which patterns to follow. **NEVER mix patterns between types.**
 
 Always implement in this order:
 
-1. **Domain models** — `@freezed` + `@Default()` fields, no nullable. See `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md` (DateTime/`.empty()` rules in Field Rules).
+1. **Domain models** — `@freezed` + `@Default()` fields, no nullable. See `${UFIL_ROOT}/docs/DOMAIN_LAYER.md` (DateTime/`.empty()` rules in Field Rules).
 2. **Repository contracts** — abstract class
 3. **UseCases** — `@lazySingleton`, plain `call()` method, no base class
-4. **DTOs/Response/Request models** — `@freezed` + nullable + `@JsonKey` on EVERY field, NO `.toModel()` on DTO. See `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md`.
+4. **DTOs/Response/Request models** — `@freezed` + nullable + `@JsonKey` on EVERY field, NO `.toModel()` on DTO. See `${UFIL_ROOT}/docs/DATA_LAYER.md`.
    - DTO (`{Name}Dto`): individual entity from the API
    - Response (`{Action}Response`): full API response wrapper (data + meta)
    - Request (`{Action}Request`): outgoing request body — needs `toJson()` (json_serializable generates it)
-5. **Mappers** — separate `@lazySingleton` classes (BOTH modular AND single-module). See `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` for full rules including the canonical `nullable_extensions.dart` (forbids private sanitizer helpers).
+5. **Mappers** — separate `@lazySingleton` classes (BOTH modular AND single-module). See `${UFIL_ROOT}/docs/MAPPERS.md` for full rules including the canonical `nullable_extensions.dart` (forbids private sanitizer helpers).
    - `{Name}ModelMapper` — DTO → Model: `mapFromData(Dto? data)`
    - `{Action}ResultMapper` — Response → Result: `mapFromData(Response? data)`, composes ModelMappers
    - `{Action}RequestMapper` — Params → Request: `mapFromDomain(Params params)` (only when there's a request body)
@@ -80,7 +80,7 @@ Architecture & patterns:
   3. Use `AppColors.<name>` in the widget (import from `package:feature_common/gen/colors.gen.dart` in modular, or `package:<app>/gen/colors.gen.dart` in single-module).
   Never inline a hex literal then "add to colors.xml later" — the literal must never be committed. Generated `colors.gen.dart` is the ONLY file allowed to contain raw `Color(0x..)`.
 
-Bloc structure (see `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` for full detail):
+Bloc structure (see `${UFIL_ROOT}/docs/BLOC_PATTERN.md` for full detail):
 
 - **File structure** — `part`/`part of`: bloc is main file, event and state are `part of` bloc
 - **`@freezed abstract class`** for events, states, sub-states (NOT `sealed class`)
@@ -91,12 +91,12 @@ Bloc structure (see `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` for full detail
 
 Domain & data invariants (see linked docs for full reasoning):
 
-- **No `DateTime?` in domain layer** — every `DateTime` on `*_model.dart`/`*_params.dart`/`*_result.dart` must be `required DateTime`, and the class must expose a `.empty()` factory that fills each DateTime with `DateTime.now()`. The `.empty()` body uses `{ return ...; }`, never arrow. See `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md`.
-- **No private sanitizer helpers inside mappers** — never `_nullIfEmpty`, `_nullIfZero`, `_formatDate`, `_trimOrNull`. Use the canonical `nullable_extensions.dart` (method-style: `.orEmpty()` / `.orZero()` / `.orFalse()` / `.orNull()` / `.toIsoDate()`). Display fallback `.orDash()` lives in a SEPARATE file and is FORBIDDEN inside a mapper. See `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` → Reusable Sanitization Extensions for exact paths and the rule on adding missing variants.
+- **No `DateTime?` in domain layer** — every `DateTime` on `*_model.dart`/`*_params.dart`/`*_result.dart` must be `required DateTime`, and the class must expose a `.empty()` factory that fills each DateTime with `DateTime.now()`. The `.empty()` body uses `{ return ...; }`, never arrow. See `${UFIL_ROOT}/docs/DOMAIN_LAYER.md`.
+- **No private sanitizer helpers inside mappers** — never `_nullIfEmpty`, `_nullIfZero`, `_formatDate`, `_trimOrNull`. Use the canonical `nullable_extensions.dart` (method-style: `.orEmpty()` / `.orZero()` / `.orFalse()` / `.orNull()` / `.toIsoDate()`). Display fallback `.orDash()` lives in a SEPARATE file and is FORBIDDEN inside a mapper. See `${UFIL_ROOT}/docs/MAPPERS.md` → Reusable Sanitization Extensions for exact paths and the rule on adding missing variants.
 
 ### Performance Rules (NON-NEGOTIABLE)
 
-See `${CLAUDE_PLUGIN_ROOT}/skills/flutter-performance/SKILL.md` for full decision matrix. Summary of must-follow rules:
+See `${UFIL_ROOT}/skills/flutter-performance/SKILL.md` for full decision matrix. Summary of must-follow rules:
 
 - **Every widget class MUST have `const` constructor** — no exceptions
 - **NO helper methods returning widgets** — extract to `const` widget class (Exception: helpers that return non-widgets, or conditional widget selection inside a single `build()`)
@@ -105,9 +105,9 @@ See `${CLAUDE_PLUGIN_ROOT}/skills/flutter-performance/SKILL.md` for full decisio
 - **No allocation in `build()`** — no list mapping, no parsing, no `DateTime.now()`. Compute in Bloc state instead
 - **`BlocSelector` over `BlocBuilder`** when widget depends only on a partial state field
 - **Images use `cacheWidth`/`cacheHeight`** or `CachedNetworkImage` with `memCacheWidth`/`memCacheHeight`
-- **Avoid `saveLayer()` triggers** — `ShaderMask`, `ColorFiltered`, `BackdropFilter`, `Opacity` (with child), `Chip` with translucent `disabledColor`, `Text` with `TextOverflow.fade`. Prefer static `BoxDecoration.gradient`, full-alpha disabled colors, or `Color.withOpacity()`
-- **`ClipRRect` is last resort** — for solid-color rounded shapes use `Container` + `BoxDecoration(borderRadius:)`
-- **`StringBuffer` for string accumulation in loops** — never `result += '...'` in `for`/`while` (O(n²)). Use `iterable.map(...).join(', ')` for separator-joined strings.
+- **Avoid `saveLayer()` triggers** — `ShaderMask`, `ColorFiltered`, `BackdropFilter`, `Opacity` (with child), `Chip` with translucent `disabledColor`, `Text` with `TextOverflow.fade`. Use static `BoxDecoration.gradient`, full-alpha disabled colors, or `Color.withOpacity()` instead.
+- **`ClipRRect` is last resort** — for solid-color rounded shapes use `Container` + `BoxDecoration(borderRadius:)`. Only use `ClipRRect` when actually clipping a child whose paint extends beyond bounds.
+- **`StringBuffer` for string accumulation in loops** — never `result += '...'` inside `for`/`while` (O(n²)). Use `iterable.map(...).join(', ')` for separator-joined strings.
 
 ---
 
@@ -747,15 +747,15 @@ abstract class AlertState with _$AlertState {
 
 ## References
 
-Resolve `$CLAUDE_PLUGIN_ROOT` first (see Step 0). All paths below are absolute via that variable.
+Resolve `UFIL_ROOT` first (see Step 0). All paths below are absolute via that variable.
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
-- `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns and conventions
-- `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md` — Data layer patterns, DTOs, datasources
-- `${CLAUDE_PLUGIN_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer, pages, widgets
-- `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
-- `${CLAUDE_PLUGIN_ROOT}/docs/CODE_STYLE.md` — Import ordering and code formatting
-- `${CLAUDE_PLUGIN_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
-- `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` — Mapper creation rules (apply to BOTH project types)
-- `${CLAUDE_PLUGIN_ROOT}/docs/PERFORMANCE.md` — Performance guidelines (developer reference)
-- `${CLAUDE_PLUGIN_ROOT}/skills/flutter-performance/SKILL.md` — Const class vs helper, isolate vs compute, ListView optimization
+- `${UFIL_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
+- `${UFIL_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns and conventions
+- `${UFIL_ROOT}/docs/DATA_LAYER.md` — Data layer patterns, DTOs, datasources
+- `${UFIL_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer, pages, widgets
+- `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
+- `${UFIL_ROOT}/docs/CODE_STYLE.md` — Import ordering and code formatting
+- `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
+- `${UFIL_ROOT}/docs/MAPPERS.md` — Mapper creation rules (apply to BOTH project types)
+- `${UFIL_ROOT}/docs/PERFORMANCE.md` — Performance guidelines (developer reference)
+- `${UFIL_ROOT}/skills/flutter-performance/SKILL.md` — Const class vs helper, isolate vs compute, ListView optimization

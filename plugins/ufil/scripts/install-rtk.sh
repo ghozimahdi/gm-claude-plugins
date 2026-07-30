@@ -14,6 +14,11 @@
 
 set -u
 
+# RTK installs a Claude Code global hook and is intentionally skipped in Codex.
+if [[ -n "${PLUGIN_ROOT:-}" ]]; then
+  exit 0
+fi
+
 SENTINEL_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/ufil"
 SENTINEL_FILE="$SENTINEL_DIR/rtk-initialized"
 

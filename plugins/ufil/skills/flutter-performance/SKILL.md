@@ -1,8 +1,11 @@
 ---
 name: flutter-performance
 description: "GM Flutter performance patterns — const class vs helper method, isolate vs compute, ListView builder, RepaintBoundary, image caching, build optimization"
-disable-model-invocation: true
 ---
+
+Resolve `UFIL_ROOT` to the plugin root containing this skill. Claude Code may
+provide `CLAUDE_PLUGIN_ROOT`; Codex can resolve it from the installed skill
+path.
 
 ## Flutter Performance Patterns (GM Standard)
 
@@ -400,4 +403,4 @@ final result = users.map((u) => 'Mr ${u.firstName} ${u.lastName}').join(', ');
 
 ## References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/PERFORMANCE.md` — full developer-facing reference: rationale, profiling workflow, extended examples
+- `${UFIL_ROOT}/docs/PERFORMANCE.md` — full developer-facing reference: rationale, profiling workflow, extended examples

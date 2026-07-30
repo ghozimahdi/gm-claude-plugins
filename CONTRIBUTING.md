@@ -1,14 +1,14 @@
 # Contributing
 
-Thanks for your interest in improving **GM Claude Plugins**! Contributions are welcome via **fork + pull request** workflow.
+Thanks for your interest in improving **GM AI Agent Plugins**! Contributions are welcome via **fork + pull request** workflow.
 
 ## Getting Started
 
 1. **Fork** this repository on GitHub
 2. **Clone** your fork locally:
    ```bash
-   git clone https://github.com/<your-username>/gm-claude-plugins.git
-   cd gm-claude-plugins
+   git clone https://github.com/<your-username>/gm-aiagent-plugins.git
+   cd gm-aiagent-plugins
    ```
 3. Create a **feature branch** from `main` using the `<type>/<plugin>/<description>` format (see [Branch Naming](#branch-naming)):
    ```bash
@@ -64,7 +64,7 @@ Because contributions go through forks, your fork will drift from this repo as n
 ## Repository Structure
 
 ```
-gm-claude-plugins/
+gm-aiagent-plugins/
 ├── .claude-plugin/
 │   └── marketplace.json        # Marketplace listing (all plugins)
 ├── plugins/
@@ -146,18 +146,33 @@ chore: update root README with new plugin
 - Skill files (`SKILL.md`) must include frontmatter with `name`, `description`, and `disable-model-invocation`
 - Command files must include frontmatter with `description`, `argument-hint`, and `allowed-tools`
 - Agent files must include frontmatter with `name`, `description`, `model`, and `maxTurns`
+- Repository workflows shared with Codex live under `.agents/skills/<name>/SKILL.md`.
+  A matching `.claude/commands/<name>.md` may remain as a thin Claude wrapper.
 
 ### Testing Your Changes
 
-1. Install the plugin locally:
+1. Install the plugin locally in Claude Code:
    ```bash
    /plugin marketplace add /path/to/your-fork
-   /plugin install <plugin-name>@gm-claude-plugins
+   /plugin install <plugin-name>@gm-aiagent-plugins
    /reload-plugins
    ```
-   Example: `/plugin install ufil@gm-claude-plugins` or `/plugin install rubyku@gm-claude-plugins`.
-2. Test in a real project for the target platform to verify skills, commands, and agents work correctly.
-3. If you touched plugin-specific scripts (e.g. `ufil/scripts/generate-module.sh`), test every mode the script supports (e.g. `--modular` and `--single`).
+   Example: `/plugin install ufil@gm-aiagent-plugins` or `/plugin install rubyku@gm-aiagent-plugins`.
+2. Install it locally in Codex:
+   ```bash
+   codex plugin marketplace add /path/to/your-fork
+   codex plugin add <plugin-name>@gm-aiagent-plugins
+   ```
+3. Test in a real project for the target platform to verify skills, commands, hooks, and agents work correctly.
+4. If you touched plugin-specific scripts (e.g. `ufil/scripts/generate-module.sh`), test every mode the script supports (e.g. `--modular` and `--single`).
+
+### Repository release workflow
+
+- Claude Code: `/release <plugin> [version]`
+- Codex: `$release <plugin> [version]`
+
+Both entry points use `.agents/skills/release/SKILL.md` as the authoritative
+workflow.
 
 ## Contact
 

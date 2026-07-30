@@ -1,8 +1,11 @@
 ---
 name: melos
 description: "GM Melos workspace patterns — config under melos: key in pubspec.yaml, pub workspaces, scripts for modular and single-package projects"
-disable-model-invocation: true
 ---
+
+Resolve `UFIL_ROOT` to the plugin root containing this skill. Claude Code may
+provide `CLAUDE_PLUGIN_ROOT`; Codex can resolve it from the installed skill
+path.
 
 ## Melos Patterns (GM Standard)
 
@@ -243,4 +246,4 @@ One file at the root is sufficient for the entire workspace. The Dart analyzer w
 
 ### References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
+- `${UFIL_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module

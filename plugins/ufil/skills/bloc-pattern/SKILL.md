@@ -1,8 +1,11 @@
 ---
 name: bloc-pattern
 description: "GM Bloc state management patterns — part/part-of structure, sub-state unions (idle/loading/error/done), modular (Failure) vs non-modular (Result switch)"
-disable-model-invocation: true
 ---
+
+Resolve `UFIL_ROOT` to the plugin root containing this skill. Claude Code may
+provide `CLAUDE_PLUGIN_ROOT`; Codex can resolve it from the installed skill
+path.
 
 ## Bloc Patterns (GM Standard)
 
@@ -380,5 +383,5 @@ BlocListener<PropertyDetailBloc, PropertyDetailState>(
 
 ### References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` — Detailed Bloc patterns and conventions
-- `${CLAUDE_PLUGIN_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer structure
+- `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — Detailed Bloc patterns and conventions
+- `${UFIL_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer structure

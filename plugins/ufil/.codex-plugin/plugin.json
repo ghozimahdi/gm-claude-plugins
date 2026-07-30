@@ -1,0 +1,58 @@
+{
+  "name": "ufil",
+  "version": "1.0.0",
+  "description": "Flutter Clean Architecture and modularization workflows with Dart and Serena MCP integration.",
+  "author": {
+    "name": "Ghozi Mahdi",
+    "email": "ghozi.dev@gmail.com",
+    "url": "https://github.com/ghozimahdi"
+  },
+  "homepage": "https://github.com/ghozimahdi/gm-aiagent-plugins/tree/main/plugins/ufil",
+  "repository": "https://github.com/ghozimahdi/gm-aiagent-plugins",
+  "license": "MIT",
+  "keywords": [
+    "flutter",
+    "dart",
+    "clean-architecture",
+    "modularization",
+    "bloc",
+    "freezed",
+    "injectable"
+  ],
+  "skills": "./skills/",
+  "mcpServers": {
+    "dart-flutter": {
+      "command": "dart",
+      "args": [
+        "mcp-server"
+      ]
+    },
+    "serena": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server",
+        "--project-from-cwd",
+        "--context=codex"
+      ]
+    }
+  },
+  "interface": {
+    "displayName": "UFIL",
+    "shortDescription": "Flutter architecture workflows for Codex",
+    "longDescription": "Plan, implement, test, and review Flutter applications using UFIL Clean Architecture conventions, reusable skills, and Dart and Serena MCP tools.",
+    "developerName": "Ghozi Mahdi",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Plan a Flutter feature using UFIL clean architecture.",
+      "Implement this Flutter feature using UFIL conventions.",
+      "Review this Flutter code for UFIL architecture violations."
+    ]
+  }
+}

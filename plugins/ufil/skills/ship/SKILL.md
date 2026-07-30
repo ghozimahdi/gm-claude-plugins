@@ -1,12 +1,16 @@
 ---
+name: ship
 description: "Ship a feature — write tests, review code, commit, and create PR."
-argument-hint: "[feature-scope]"
-allowed-tools: ["Read", "Edit", "Write", "Bash", "Glob", "Grep", "Agent", "Skill"]
 ---
+
+Use the current user request as this skill's input. In Claude Code invoke it as
+`/ufil:ship`; in Codex invoke it as `$ufil:ship`. Resolve `UFIL_ROOT` to the
+plugin root containing this skill; Claude Code may provide
+`CLAUDE_PLUGIN_ROOT`, while Codex can resolve it from the installed skill path.
 
 Ship a feature — write tests, review code, commit, and create PR.
 
-Arguments: $ARGUMENTS (feature scope like "auth" or "tenant")
+Arguments: <requested arguments> (feature scope like "auth" or "tenant")
 
 ## Project Type Detection (MUST DO FIRST)
 - **Modular**: `packages/` directory exists → multi-package with melos
@@ -40,7 +44,7 @@ Arguments: $ARGUMENTS (feature scope like "auth" or "tenant")
 
 ## References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
-- `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
-- `${CLAUDE_PLUGIN_ROOT}/docs/COMMIT_CONVENTION.md` — Commit message format
-- `${CLAUDE_PLUGIN_ROOT}/docs/PULL_REQUEST.md` — PR format and template
+- `${UFIL_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
+- `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
+- `${UFIL_ROOT}/docs/COMMIT_CONVENTION.md` — Commit message format
+- `${UFIL_ROOT}/docs/PULL_REQUEST.md` — PR format and template

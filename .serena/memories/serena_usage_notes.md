@@ -2,7 +2,7 @@
 
 ## Configuration
 - Language: **dart** (configured in root `.serena/project.yml`)
-- Project name: `gm-claude-plugins`
+- Project name: `gm-aiagent-plugins`
 - The Dart LSP is mainly useful when working on Flutter code in target projects, not this plugin repo itself
 
 ## When working in this plugin repo
