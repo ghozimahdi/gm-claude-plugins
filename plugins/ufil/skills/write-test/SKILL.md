@@ -1,6 +1,7 @@
 ---
 name: write-test
 description: "Write tests for a feature or file following GM testing conventions."
+disable-model-invocation: true
 ---
 
 Use the current user request as this skill's input. In Claude Code invoke it as

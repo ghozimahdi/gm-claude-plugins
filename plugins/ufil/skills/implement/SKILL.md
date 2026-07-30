@@ -1,6 +1,7 @@
 ---
 name: implement
 description: "Implement a feature following clean architecture. Use for end-to-end implementation from a saved plan or ticket."
+disable-model-invocation: true
 ---
 
 Use the current user request as this skill's input. In Claude Code invoke it as

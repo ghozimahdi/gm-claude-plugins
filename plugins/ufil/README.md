@@ -14,7 +14,7 @@ Supports both **modular** (multi-package + melos) and **single-module** project 
 | `gm-implementer` | Writes production code following standards          | Sonnet |
 | `gm-reviewer`    | Reviews code for architecture violations            | Sonnet |
 
-### Shared Skills (23)
+### Shared Skills (24)
 
 UFIL exposes the same skills to both clients:
 

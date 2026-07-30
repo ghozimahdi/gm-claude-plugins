@@ -1,6 +1,7 @@
 ---
 name: generate-module
 description: "Generate a feature module (domain/data/presentation) for modular Flutter projects following GM clean architecture."
+disable-model-invocation: true
 ---
 
 Use the current user request as this skill's input. In Claude Code invoke it as

@@ -1,6 +1,7 @@
 ---
 name: create-pr
 description: "Create a GitHub pull request with structured summary and changes."
+disable-model-invocation: true
 ---
 
 Use the current user request as this skill's input. In Claude Code invoke it as

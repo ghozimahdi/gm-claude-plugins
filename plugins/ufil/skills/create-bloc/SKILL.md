@@ -1,6 +1,7 @@
 ---
 name: create-bloc
 description: "Create a BLoC (3 files: bloc/event/state) following GM BLoC pattern with sub-state unions, optional AlertState, and optional Failure params."
+disable-model-invocation: true
 ---
 
 Use the current user request as this skill's input. In Claude Code invoke it as

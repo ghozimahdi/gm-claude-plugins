@@ -1,6 +1,7 @@
 ---
 name: implement-batch
 description: "Implement multiple features in parallel using multiple agents. Auto-scales based on task count."
+disable-model-invocation: true
 ---
 
 Use the current user request as this skill's input. In Claude Code invoke it as

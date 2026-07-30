@@ -4,6 +4,9 @@
 set -u
 
 hook_input="$(cat)"
+if [[ -z "$hook_input" ]]; then
+  hook_input="${CLAUDE_TOOL_INPUT:-}"
+fi
 
 case "$hook_input" in
   *'"command":"git commit'*|*'"command": "git commit'*)

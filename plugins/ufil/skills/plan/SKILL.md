@@ -1,6 +1,7 @@
 ---
 name: plan
 description: "Analyze a GitHub issue/ticket and create a Flutter implementation plan markdown before coding."
+disable-model-invocation: true
 ---
 
 Use the current user request as this skill's input. In Claude Code invoke it as

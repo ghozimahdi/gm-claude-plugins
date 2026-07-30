@@ -1,6 +1,7 @@
 ---
 name: commit
 description: "Create a git commit using Conventional Commits format with ticket ID."
+disable-model-invocation: true
 ---
 
 Use the current user request as this skill's input. In Claude Code invoke it as

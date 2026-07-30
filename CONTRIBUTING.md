@@ -143,7 +143,7 @@ chore: update root README with new plugin
 ### Code Style for Markdown Files
 
 - Use fenced code blocks with language identifiers (` ```dart `, ` ```bash `)
-- Skill files (`SKILL.md`) must include frontmatter with `name`, `description`, and `disable-model-invocation`
+- Skill files (`SKILL.md`) must include frontmatter with `name` and `description`. Workflow/action skills that produce side effects (build, commit, ship, create-pr, etc.) must also set `disable-model-invocation: true` so they only run via explicit `/plugin:skill` invocation. Reference/pattern skills (e.g. clean-architecture, bloc-pattern) omit it so Claude can pull them in automatically as context.
 - Command files must include frontmatter with `description`, `argument-hint`, and `allowed-tools`
 - Agent files must include frontmatter with `name`, `description`, `model`, and `maxTurns`
 - Repository workflows shared with Codex live under `.agents/skills/<name>/SKILL.md`.

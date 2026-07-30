@@ -1,6 +1,7 @@
 ---
 name: serena-refresh
 description: "Force Serena to re-run project onboarding. Use after major refactors, package moves, or when symbol search returns stale results."
+disable-model-invocation: true
 ---
 
 Use the current user request as this skill's input. In Claude Code invoke it as

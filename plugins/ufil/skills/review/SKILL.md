@@ -1,6 +1,7 @@
 ---
 name: review
 description: "Review the current codebase for architecture violations. Use for code quality audits."
+disable-model-invocation: true
 ---
 
 Use the current user request as this skill's input. In Claude Code invoke it as

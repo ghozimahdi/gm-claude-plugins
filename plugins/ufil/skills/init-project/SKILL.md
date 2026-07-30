@@ -1,6 +1,7 @@
 ---
 name: init-project
 description: "Scaffold a new Flutter project with GM clean architecture. Supports modular (multi-package + melos) and single-module structures."
+disable-model-invocation: true
 ---
 
 Use the current user request as this skill's input. In Claude Code invoke it as

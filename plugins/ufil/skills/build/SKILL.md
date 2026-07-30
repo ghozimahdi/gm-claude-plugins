@@ -1,6 +1,7 @@
 ---
 name: build
 description: "Run code generation (freezed, injectable, auto_route, envied). Use after adding annotations or modifying annotated code."
+disable-model-invocation: true
 ---
 
 Use the current user request as this skill's input. In Claude Code invoke it as

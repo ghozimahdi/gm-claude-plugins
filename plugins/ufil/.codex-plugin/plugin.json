@@ -1,6 +1,6 @@
 {
   "name": "ufil",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "Flutter Clean Architecture and modularization workflows with Dart and Serena MCP integration.",
   "author": {
     "name": "Ghozi Mahdi",

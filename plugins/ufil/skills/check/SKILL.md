@@ -1,6 +1,7 @@
 ---
 name: check
 description: "Run static analysis and formatting to ensure code quality. Use before committing."
+disable-model-invocation: true
 ---
 
 Use the current user request as this skill's input. In Claude Code invoke it as

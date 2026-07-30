@@ -1,6 +1,7 @@
 ---
 name: ship
 description: "Ship a feature — write tests, review code, commit, and create PR."
+disable-model-invocation: true
 ---
 
 Use the current user request as this skill's input. In Claude Code invoke it as

@@ -1,6 +1,7 @@
 ---
 name: test
 description: "Run all tests and report results. Use after implementing features."
+disable-model-invocation: true
 ---
 
 Use the current user request as this skill's input. In Claude Code invoke it as
