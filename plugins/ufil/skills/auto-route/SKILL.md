@@ -1,8 +1,11 @@
 ---
 name: auto-route
 description: "GM Auto Route patterns — modular (RouteProvider + per-feature router) vs non-modular (single AppRouter)"
-disable-model-invocation: true
 ---
+
+Resolve `UFIL_ROOT` to the plugin root containing this skill. Claude Code may
+provide `CLAUDE_PLUGIN_ROOT`; Codex can resolve it from the installed skill
+path.
 
 ## Auto Route Patterns (GM Standard)
 
@@ -185,5 +188,5 @@ context.router.push(loginProvider.route());
 
 ### References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/ROUTING.md` — Route provider patterns for navigation
-- `${CLAUDE_PLUGIN_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer structure
+- `${UFIL_ROOT}/docs/ROUTING.md` — Route provider patterns for navigation
+- `${UFIL_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer structure

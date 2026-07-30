@@ -1,8 +1,13 @@
 ---
+name: review
 description: "Review the current codebase for architecture violations. Use for code quality audits."
-argument-hint: "[feature-name or path]"
-allowed-tools: ["Read", "Glob", "Grep", "Bash"]
+disable-model-invocation: true
 ---
+
+Use the current user request as this skill's input. In Claude Code invoke it as
+`/ufil:review`; in Codex invoke it as `$ufil:review`. Resolve `UFIL_ROOT` to the
+plugin root containing this skill; Claude Code may provide
+`CLAUDE_PLUGIN_ROOT`, while Codex can resolve it from the installed skill path.
 
 Review the current codebase for architecture violations.
 
@@ -61,9 +66,9 @@ Run analyzer at the end to confirm zero issues.
 
 ## References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
-- `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
-- `${CLAUDE_PLUGIN_ROOT}/docs/CODE_STYLE.md` — Import ordering and code formatting
-- `${CLAUDE_PLUGIN_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
-- `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md` — Data layer patterns, DTOs, datasources
-- `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns and conventions
+- `${UFIL_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
+- `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
+- `${UFIL_ROOT}/docs/CODE_STYLE.md` — Import ordering and code formatting
+- `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
+- `${UFIL_ROOT}/docs/DATA_LAYER.md` — Data layer patterns, DTOs, datasources
+- `${UFIL_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns and conventions

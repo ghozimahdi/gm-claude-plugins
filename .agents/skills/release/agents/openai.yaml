@@ -1,0 +1,7 @@
+interface:
+  display_name: "Release Plugin"
+  short_description: "Cut and publish a plugin release safely"
+  default_prompt: "Use $release to publish the requested plugin version."
+
+policy:
+  allow_implicit_invocation: false

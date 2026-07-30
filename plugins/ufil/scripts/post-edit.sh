@@ -1,11 +1,14 @@
-#!/bin/bash
-# Post-edit hook: checks if a .dart file was edited and reports reminder
-# This hook runs after every Write/Edit tool call
+#!/usr/bin/env bash
+# Cross-client post-edit hook: report a reminder after editing a Dart file.
 
-TOOL_INPUT="${CLAUDE_TOOL_INPUT:-}"
+set -u
 
-# Only act on .dart files
-if echo "$TOOL_INPUT" | grep -q '\.dart'; then
+hook_input="$(cat)"
+if [[ -z "$hook_input" ]]; then
+  hook_input="${CLAUDE_TOOL_INPUT:-}"
+fi
+
+if [[ "$hook_input" == *".dart"* ]]; then
   echo '{"message": "Dart file edited. Remember to run analyze before committing."}'
 fi
 

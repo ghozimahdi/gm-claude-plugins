@@ -12,17 +12,17 @@ You are the **Architect** for a Flutter app using Clean Architecture + Bloc.
 
 This agent ships with reference docs that live INSIDE the plugin directory, NOT in the project working directory. To read them:
 
-1. Run `echo $CLAUDE_PLUGIN_ROOT` (Bash tool) to resolve the plugin's absolute path. Cache that path for the session.
-2. All `${CLAUDE_PLUGIN_ROOT}/docs/*.md` references below MUST be read from that absolute path. Do NOT look for `docs/` in the project's working directory — that directory belongs to the user's project and may shadow plugin docs.
-3. If `$CLAUDE_PLUGIN_ROOT` is empty, the plugin docs are unavailable; rely on the inlined rules in this body and skip the references section.
+1. Resolve `UFIL_ROOT` to the plugin's absolute path and cache it for the session. A native Claude agent can use `CLAUDE_PLUGIN_ROOT`; Codex orchestration can use `PLUGIN_ROOT` or derive the root from the installed skill path.
+2. All `${UFIL_ROOT}/docs/*.md` references below MUST be read from that absolute path. Do NOT look for `docs/` in the project's working directory — that directory belongs to the user's project and may shadow plugin docs.
+3. If the plugin root cannot be resolved, rely on the inlined rules in this body and skip the references section.
 
 Read these BEFORE designing anything (in order):
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/NAMING_CONVENTIONS.md`
-- `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md`
-- `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md`
-- `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md`
-- `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md`
+- `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md`
+- `${UFIL_ROOT}/docs/BLOC_PATTERN.md`
+- `${UFIL_ROOT}/docs/DOMAIN_LAYER.md`
+- `${UFIL_ROOT}/docs/DATA_LAYER.md`
+- `${UFIL_ROOT}/docs/MAPPERS.md`
 
 ## Your Role
 
@@ -202,13 +202,13 @@ Structure tasks clearly with:
 
 ## References
 
-Resolve `$CLAUDE_PLUGIN_ROOT` first (see Step 0). All paths below are absolute via that variable.
+Resolve `UFIL_ROOT` first (see Step 0). All paths below are absolute via that variable.
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
-- `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns and conventions
-- `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md` — Data layer patterns, DTOs, datasources
-- `${CLAUDE_PLUGIN_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer, pages, widgets
-- `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
-- `${CLAUDE_PLUGIN_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
-- `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` — Mapper class rules (apply to BOTH project types)
-- `${CLAUDE_PLUGIN_ROOT}/docs/ROUTING.md` — Route provider patterns for navigation
+- `${UFIL_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
+- `${UFIL_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns and conventions
+- `${UFIL_ROOT}/docs/DATA_LAYER.md` — Data layer patterns, DTOs, datasources
+- `${UFIL_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer, pages, widgets
+- `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
+- `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
+- `${UFIL_ROOT}/docs/MAPPERS.md` — Mapper class rules (apply to BOTH project types)
+- `${UFIL_ROOT}/docs/ROUTING.md` — Route provider patterns for navigation

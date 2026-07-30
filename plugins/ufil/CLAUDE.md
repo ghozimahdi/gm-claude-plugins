@@ -1,16 +1,16 @@
 # UFIL (Ultimate Flutter Intelligent Layer)
 
-This plugin provides GM's standardized Flutter development environment for Claude Code.
+This plugin provides GM's standardized Flutter development environment for Claude Code and Codex.
 Supports both **modular** (multi-package + melos) and **single-module** project structures.
 
 ## What's Included
 
 - **3 Agents**: Architect, Implementer, Reviewer
-- **8 Skills**: clean-architecture, bloc-pattern, testing-conventions, melos, auto-route, injectable-di, freezed, flutter-performance
-- **19 Commands**: init-project, generate-module, create-bloc, build, check, test, plan, implement, implement-batch, ship, review, write-test, commit, create-pr, rtk-activate, rtk-deactivate, rtk-status, serena-refresh, keep-alive
-- **Team Config**: `.claude-plugin/team-config.json` — thresholds + max parallel agents. `/implement` auto-detects ticket scope and switches to team mode (architect → parallel implementers in worktrees) when thresholds are exceeded. Tune without editing command files.
+- **24 shared skills**: 8 architecture/convention skills and 16 workflow skills
+- **3 Claude-only commands**: rtk-activate, rtk-deactivate, rtk-status
+- **Team Config**: `config/team-config.json` — thresholds + max parallel agents. `/ufil:implement` auto-detects ticket scope and switches to team mode (architect → parallel implementers in worktrees) when thresholds are exceeded. Tune without editing skill files.
 - **Hooks**: Auto dart fix + format + analyze before git commit
-- **MCP Servers**: Dart & Flutter MCP Server + Serena LSP (auto-onboards on first `/plan`, `/implement`, or `/implement-batch` when Dart code is detected; manual refresh via `/serena-refresh`)
+- **MCP Servers**: Dart & Flutter MCP Server + Serena LSP (auto-onboards on first `plan`, `implement`, or `implement-batch` run when Dart code is detected; manual refresh via `serena-refresh`)
 - **Dart LSP**: Code intelligence (go-to-definition, find references, diagnostics)
 - **RTK auto-install**: [rtk-ai/rtk](https://github.com/rtk-ai/rtk) CLI proxy installed and globally registered on first session — cuts Claude Code token usage 60-90% on `git`, `flutter`, `dart`, `melos`, etc.
 - **.claudeignore**: Template for Flutter projects
@@ -45,67 +45,67 @@ Supports both **modular** (multi-package + melos) and **single-module** project 
 ```bash
 # Quick start (local plugin directory)
 cd /path/to/your-flutter-project
-claude --plugin-dir /path/to/gm-claude-plugins/plugins/ufil
+claude --plugin-dir /path/to/gm-aiagent-plugins/plugins/ufil
 
 # Or add via marketplace (local)
-/plugin marketplace add /path/to/gm-claude-plugins
+/plugin marketplace add /path/to/gm-aiagent-plugins
 
 # Or from GitHub
-/plugin marketplace add ghozimahdi/gm-claude-plugins
+/plugin marketplace add ghozimahdi/gm-aiagent-plugins
 
 # Install from marketplace
-/plugin install ufil@gm-claude-plugins
+/plugin install ufil@gm-aiagent-plugins
 
 # Scaffold new project
-/init-project my_app --package com.example.app --modular
-/init-project my_app --package com.example.app --single
+/ufil:init-project my_app --package com.example.app --modular
+/ufil:init-project my_app --package com.example.app --single
 
 # Generate feature module
-/generate-module tenant
-/generate-module payment --layer domain
+/ufil:generate-module tenant
+/ufil:generate-module payment --layer domain
 
 # Create a single BLoC (3 files: bloc/event/state)
-/create-bloc home
-/create-bloc home --actions get_transaction,add_transaction --alert
-/create-bloc property_detail --with-failure --actions get_property_detail,delete_property
+/ufil:create-bloc home
+/ufil:create-bloc home --actions get_transaction,add_transaction --alert
+/ufil:create-bloc property_detail --with-failure --actions get_property_detail,delete_property
 
 # Plan a ticket BEFORE implementing (uses Serena, saves plan markdown)
-/plan 123
-/plan issues/456
+/ufil:plan 123
+/ufil:plan issues/456
 
 # Implement using the saved plan (auto-detects scope + team mode)
-/implement 123
+/ufil:implement 123
 
 # Commit with Conventional Commits
-/commit
-/commit fix login timeout issue
+/ufil:commit
+/ufil:commit fix login timeout issue
 
 # Implement multiple features in parallel (auto-scales agents)
-/implement-batch tenant payment
-/implement-batch auth tenant notification
+/ufil:implement-batch tenant payment
+/ufil:implement-batch auth tenant notification
 
 # Create pull request
-/create-pr
-/create-pr develop
+/ufil:create-pr
+/ufil:create-pr develop
 
 # Manage RTK token-saving hook
-/rtk-status
-/rtk-activate
-/rtk-deactivate
+/ufil:rtk-status
+/ufil:rtk-activate
+/ufil:rtk-deactivate
 
 # Force Serena re-onboarding after a large refactor or branch switch
-/serena-refresh
+/ufil:serena-refresh
 ```
 
 ## Serena Onboarding Behavior
 
 Serena's project index (symbols, references, memories) is bootstrapped lazily:
 
-- **`/init-project`** does NOT run onboarding — the scaffold is freshly generated and Serena would index boilerplate that the user is about to rewrite.
-- **`/plan`, `/implement`, `/implement-batch`** check `mcp__serena__check_onboarding_performed` on every invocation:
+- **`init-project`** does NOT run onboarding — the scaffold is freshly generated and Serena would index boilerplate that the user is about to rewrite.
+- **`plan`, `implement`, `implement-batch`** check Serena's onboarding state on every invocation:
   - Onboarded → proceed.
   - Not onboarded AND Dart files detected → call `mcp__serena__onboarding` once (transparent to the user; takes <1 min on most projects).
   - Not onboarded AND no Dart files → skip onboarding, fall back to Glob/Grep/Read, notify the user that it will retry next time.
-- **`/serena-refresh`** forces re-onboarding when the index goes stale (large refactor, package restructuring, project-type switch).
+- **`serena-refresh`** forces re-onboarding when the index goes stale (large refactor, package restructuring, project-type switch).
 
 The plugin intentionally does NOT ship a pre-built `.serena/` folder — onboarding data is project-specific (symbols, file paths, memories about THIS codebase), so a generic seed would be useless or actively misleading.

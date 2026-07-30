@@ -1,17 +1,22 @@
 ---
+name: generate-module
 description: "Generate a feature module (domain/data/presentation) for modular Flutter projects following GM clean architecture."
-argument-hint: "<module-name> [--layer domain|data|presentation|all]"
-allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
+disable-model-invocation: true
 ---
+
+Use the current user request as this skill's input. In Claude Code invoke it as
+`/ufil:generate-module`; in Codex invoke it as `$ufil:generate-module`. Resolve
+`UFIL_ROOT` to the plugin root containing this skill; Claude Code may provide
+`CLAUDE_PLUGIN_ROOT`, while Codex can resolve it from the installed skill path.
 
 Generate a feature module for a Flutter project.
 
-**Script available at `${CLAUDE_PLUGIN_ROOT}/scripts/generate-module.sh`:**
+**Script available at `${UFIL_ROOT}/scripts/generate-module.sh`:**
 - `generate-module.sh <name> [--modular|--single] [--layer domain|data|presentation|all]`
 
 Run the script first, then follow up with manual wiring below.
 
-Arguments: $ARGUMENTS (module name like "tenant" or "payment", optionally with --layer flag)
+Arguments: <requested arguments> (module name like "tenant" or "payment", optionally with --layer flag)
 
 ## Steps
 
@@ -110,11 +115,11 @@ Create `lib/features/<name>/` with:
 
 ## References
 
-Plugin docs live at `$CLAUDE_PLUGIN_ROOT` (run `echo $CLAUDE_PLUGIN_ROOT` to resolve).
+Plugin docs live under the resolved `UFIL_ROOT`.
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
-- `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns and conventions
-- `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md` — Data layer patterns, DTOs, datasources
-- `${CLAUDE_PLUGIN_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer, pages, widgets
-- `${CLAUDE_PLUGIN_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
-- `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` — Mapper creation rules (apply to BOTH project types)
+- `${UFIL_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
+- `${UFIL_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns and conventions
+- `${UFIL_ROOT}/docs/DATA_LAYER.md` — Data layer patterns, DTOs, datasources
+- `${UFIL_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer, pages, widgets
+- `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
+- `${UFIL_ROOT}/docs/MAPPERS.md` — Mapper creation rules (apply to BOTH project types)

@@ -1,6 +1,6 @@
 # Project Purpose
 
-**gm-claude-plugins** is a multi-plugin marketplace repository for Claude Code plugins by Ghozi Mahdi.
+**gm-aiagent-plugins** is a multi-plugin marketplace repository for Claude Code and Codex plugins by Ghozi Mahdi.
 
 It is NOT a Flutter app — it is a collection of Claude Code plugin definitions (Markdown, Bash scripts, JSON configs) distributed via Claude Code's plugin marketplace system.
 
@@ -23,6 +23,6 @@ It is NOT a Flutter app — it is a collection of Claude Code plugin definitions
 - Root `.serena/` — Serena LSP config for the repo
 
 ## Repository
-- URL: https://github.com/ghozimahdi/gm-claude-plugins
+- URL: https://github.com/ghozimahdi/gm-aiagent-plugins
 - License: MIT
 - Author: Ghozi Mahdi (ghozi.dev@gmail.com)

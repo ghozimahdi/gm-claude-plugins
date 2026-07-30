@@ -1,11 +1,15 @@
 ---
+name: serena-refresh
 description: "Force Serena to re-run project onboarding. Use after major refactors, package moves, or when symbol search returns stale results."
-allowed-tools: ["Bash"]
+disable-model-invocation: true
 ---
+
+Use the current user request as this skill's input. In Claude Code invoke it as
+`/ufil:serena-refresh`; in Codex invoke it as `$ufil:serena-refresh`.
 
 Force Serena to re-onboard the current project.
 
-`/plan`, `/implement`, and `/implement-batch` auto-trigger onboarding once per project. This command is the escape hatch when that one-time index has gone stale — for example after:
+The `plan`, `implement`, and `implement-batch` skills auto-trigger onboarding once per project. This skill is the escape hatch when that one-time index has gone stale — for example after:
 
 - a large refactor that renames/moves many symbols
 - restructuring packages (modular: adding/removing `packages/*` entries)
@@ -21,7 +25,7 @@ Force Serena to re-onboard the current project.
    find . -maxdepth 3 -type f -name '*.dart' -not -path '*/.*' | head -1
    ```
 
-   If empty, abort and tell the user: "No Dart code detected. Scaffold the project first with `/init-project`, then re-run `/serena-refresh`."
+   If empty, abort and tell the user: "No Dart code detected. Scaffold the project first with the `init-project` skill, then re-run `serena-refresh`."
 
 2. Call `mcp__serena__initial_instructions` to ensure the instruction manual is loaded for this session.
 
@@ -35,4 +39,4 @@ Force Serena to re-onboard the current project.
 
 - Onboarding rebuilds Serena's internal index. It does NOT touch project source files.
 - A typical Flutter project re-onboards in well under a minute; large modular projects with many packages may take longer.
-- Subsequent `/plan` and `/implement` runs will reuse this refreshed index — no need to re-run unless the codebase shifts again.
+- Subsequent `plan` and `implement` runs will reuse this refreshed index — no need to re-run unless the codebase shifts again.

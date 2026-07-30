@@ -1,12 +1,17 @@
 ---
+name: write-test
 description: "Write tests for a feature or file following GM testing conventions."
-argument-hint: "[feature-name, file-path, or 'all']"
-allowed-tools: ["Read", "Edit", "Write", "Bash", "Glob", "Grep"]
+disable-model-invocation: true
 ---
+
+Use the current user request as this skill's input. In Claude Code invoke it as
+`/ufil:write-test`; in Codex invoke it as `$ufil:write-test`. Resolve
+`UFIL_ROOT` to the plugin root containing this skill; Claude Code may provide
+`CLAUDE_PLUGIN_ROOT`, while Codex can resolve it from the installed skill path.
 
 Write tests for a feature or file following GM testing conventions.
 
-Arguments: $ARGUMENTS (feature name, file path, or "all" to scan for missing tests)
+Arguments: <requested arguments> (feature name, file path, or "all" to scan for missing tests)
 
 ## Steps
 
@@ -17,8 +22,8 @@ Arguments: $ARGUMENTS (feature name, file path, or "all" to scan for missing tes
 ### 1. Identify what needs tests
 - Non-modular: find blocs, repositories, usecases, and DTOs in `lib/features/<feature>/`
 - Modular: find across `packages/domain/domain_<feature>/`, `packages/data/data_<feature>/`, `packages/presentation/feature_<feature>/`
-- If `$ARGUMENTS` is a file path, write tests for that specific file
-- If `$ARGUMENTS` is `all`, scan all features and compare against existing tests to find missing ones
+- If `<requested arguments>` is a file path, write tests for that specific file
+- If `<requested arguments>` is `all`, scan all features and compare against existing tests to find missing ones
 
 ### 2. Read source files
 Before writing any test, read the file under test and its related types (state, event, model, params).
@@ -69,5 +74,5 @@ packages/presentation/feature_<feature>/test/  # bloc_test
 
 ## References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
-- `${CLAUDE_PLUGIN_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
+- `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
+- `${UFIL_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module

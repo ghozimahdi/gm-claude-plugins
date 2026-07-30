@@ -1,12 +1,19 @@
 ---
-description: "Implement a feature following clean architecture. The main orchestration command."
-argument-hint: "[ticket-id or feature-name]"
-allowed-tools: ["Read", "Edit", "Write", "Bash", "Glob", "Grep", "Agent", "Skill"]
+name: implement
+description: "Implement a feature following clean architecture. Use for end-to-end implementation from a saved plan or ticket."
+disable-model-invocation: true
 ---
+
+Use the current user request as this skill's input. In Claude Code invoke it as
+`/ufil:implement`; in Codex invoke it as `$ufil:implement`. Resolve `UFIL_ROOT`
+to the plugin root containing this skill; Claude Code may provide
+`CLAUDE_PLUGIN_ROOT`, while Codex can resolve it from the installed skill path.
+Use the client's native subagent capability; do not hardcode one client's tool
+call schema.
 
 Implement a feature following clean architecture.
 
-Arguments: $ARGUMENTS (ticket ID or feature name)
+Arguments: <requested arguments> (ticket ID or feature name)
 
 ## Step -1: Initialize Serena (auto-onboard if needed)
 
@@ -17,10 +24,10 @@ Run in order at session start:
 3. **If not onboarded:**
    - Probe for code: `find . -maxdepth 3 -type f -name '*.dart' -not -path '*/.*' | head -1`
    - If a Dart file is found → call `mcp__serena__onboarding` (one-time per project; builds symbol index + memories).
-   - If empty → SKIP onboarding; tell the user: "Serena onboarding skipped — no Dart code detected. Will auto-run on the next /implement once code exists." Fall back to Glob/Grep/Read for this run.
+   - If empty → SKIP onboarding; tell the user: "Serena onboarding skipped — no Dart code detected. Will auto-run on the next implement workflow once code exists." Fall back to built-in search and read tools for this run.
 4. **If already onboarded:** proceed.
 
-Use Serena tools (`find_symbol`, `find_referencing_symbols`, `get_symbols_overview`, …) for all codebase exploration. Prefer them over Grep/Glob/Read. To force re-onboarding after a large refactor, run `/serena-refresh`.
+Use Serena tools (`find_symbol`, `find_referencing_symbols`, `get_symbols_overview`, …) for codebase exploration. Prefer them over built-in text search when semantic lookup applies. To force re-onboarding after a large refactor, invoke the `serena-refresh` skill.
 
 ## Project Type Detection (MUST DO FIRST)
 - **Modular**: `packages/` directory exists → multi-package project with melos
@@ -28,7 +35,7 @@ Use Serena tools (`find_symbol`, `find_referencing_symbols`, `get_symbols_overvi
 
 Steps:
 
-1. **Load plan if it exists** — check `${CLAUDE_PLUGIN_ROOT}/docs/plans/issue-<id>.md` (when `$ARGUMENTS` is an issue ID). If found, read it and use its Scope Estimate + Implementation Plan as the source of truth. If not found, find the ticket/spec in project docs and understand requirements, flow, and data model.
+1. **Load plan if it exists** — check `.ufil/plans/issue-<id>.md` in the target project when the requested scope is an issue ID. If found, read it and use its Scope Estimate + Implementation Plan as the source of truth. If not found, find the ticket/spec in project docs and understand requirements, flow, and data model.
 
 ## Step 1.5: Auto Team Mode Decision (MANDATORY before writing code)
 
@@ -36,7 +43,7 @@ After reading the ticket/spec, decide whether to use **single-agent sequential**
 
 ### Load team config
 
-Run `cat ${CLAUDE_PLUGIN_ROOT}/.claude-plugin/team-config.json` to load the config. If the file does not exist or fails to parse, use these defaults:
+Read `${UFIL_ROOT}/config/team-config.json`. If the file does not exist or fails to parse, use these defaults:
 
 ```json
 {
@@ -77,16 +84,16 @@ Scope: 1 page, 2 usecases, 1 feature, ~8 files → single-agent mode.
 
 Do NOT ask the user to re-run a different command. Run this flow yourself:
 
-1. **Architect phase** — use the `gm-architect` agent (subagent_type: `general-purpose` if `gm-architect` is not available) to produce a structured plan:
+1. **Architect phase** — read `${UFIL_ROOT}/agents/architect.md` as role guidance. In Claude Code, use the `gm-architect` agent when available. In Codex, spawn a general subagent with the same role guidance. Produce a structured plan:
    - List every file to be created/edited with full path and class name
    - Split work into **streams** using `team.splitStrategy`:
      - `by-layer-then-feature`: Stream A = domain+data (models, DTOs, mappers, repos, usecases, datasources). Stream B = presentation (blocs, events, states, pages, widgets). If presentation alone still exceeds threshold, split it into Stream B1 / B2 by page groups.
      - `by-feature-only`: one stream per feature; never split a single feature.
    - Mark inter-stream dependencies (Stream B depends on Stream A's contracts being defined).
 
-2. **Parallel implementation phase** — spawn one `gm-implementer` agent per stream (cap at `team.maxParallelAgents`; extras are batched into existing agents sequentially):
-   - Use `isolation: "worktree"` if `team.useWorktreeIsolation = true`
-   - Launch all parallel agents in a **single message** with multiple `Agent` tool calls
+2. **Parallel implementation phase** — read `${UFIL_ROOT}/agents/implementer.md` as role guidance and spawn one implementation subagent per stream (cap at `team.maxParallelAgents`; extras are batched sequentially):
+   - Use worktree isolation when the client supports it and `team.useWorktreeIsolation = true`
+   - Launch independent subagents concurrently using the client's native delegation mechanism
    - Each agent prompt MUST include: project type (modular/single-module), the architect's plan for that stream, the implementation order (domain→data→presentation), and the verification steps
 
 3. **Merge & verify** — after all agents complete:
@@ -95,7 +102,7 @@ Do NOT ask the user to re-run a different command. Run this flow yourself:
    - Run code generation, `dart fix --apply`, `dart format`, `dart analyze`
    - Fix ALL errors before reporting done
 
-4. **Auto Review (MANDATORY)** — invoke the **gm-reviewer** agent to audit all merged files:
+4. **Auto Review (MANDATORY)** — read `${UFIL_ROOT}/agents/reviewer.md` as role guidance, then use `gm-reviewer` in Claude Code or a general review subagent in Codex to audit all merged files:
    - Architecture violations (page calls UseCase directly, no Bloc; Cubit instead of Bloc; `.toModel()` on DTO; missing separate mapper class; manual `getIt.register*`; `try/catch` in datasource; missing `@JsonKey` on DTO field)
    - Naming conventions (`{Action}UseCase`, `{Name}DataSource`, `{Name}ModelMapper`, event suffix `Event`, handler camelCase, …)
    - Bloc compliance (init event present, sub-state unions with 4 variants, error variant carries `Failure`)
@@ -112,13 +119,13 @@ Proceed with Step 0 (read docs) and the sequential layer-by-layer steps that fol
 
 ## Step 0: Read these BEFORE writing code (MANDATORY)
 
-Read in order from the plugin's `${CLAUDE_PLUGIN_ROOT}/docs/` directory (resolve `$CLAUDE_PLUGIN_ROOT` via `echo $CLAUDE_PLUGIN_ROOT` first):
+Read in order from the plugin's `${UFIL_ROOT}/docs/` directory:
 
-1. `${CLAUDE_PLUGIN_ROOT}/docs/NAMING_CONVENTIONS.md` — class/file suffixes (`UseCase`, `DataSource`, `Mapper`, …)
-2. `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` — event/state shape, sub-state unions, init event
-3. `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md` — Model / Params / Result rules
-4. `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md` — DTO / Response / Request rules, datasource, repo impl
-5. `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` — separate mapper class rules (apply to BOTH project types)
+1. `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md` — class/file suffixes (`UseCase`, `DataSource`, `Mapper`, …)
+2. `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — event/state shape, sub-state unions, init event
+3. `${UFIL_ROOT}/docs/DOMAIN_LAYER.md` — Model / Params / Result rules
+4. `${UFIL_ROOT}/docs/DATA_LAYER.md` — DTO / Response / Request rules, datasource, repo impl
+5. `${UFIL_ROOT}/docs/MAPPERS.md` — separate mapper class rules (apply to BOTH project types)
 
 Do NOT proceed until all five are read. The body below is a summary; the docs are authoritative.
 
@@ -212,7 +219,7 @@ Do NOT proceed until all five are read. The body below is a summary; the docs ar
 
 7. **Tests** — bloc test, repository test, usecase test, DTO test
 
-8. **Auto Review (MANDATORY)** — invoke the **gm-reviewer** agent to audit all files created/modified in this run:
+8. **Auto Review (MANDATORY)** — read `${UFIL_ROOT}/agents/reviewer.md` as role guidance, then invoke the Claude `gm-reviewer` agent or a Codex review subagent to audit all files created/modified in this run:
    - Architecture violations (page calls UseCase directly, no Bloc; Cubit instead of Bloc; `.toModel()` on DTO; missing separate mapper class; manual `getIt.register*`; `try/catch` in datasource; missing `@JsonKey` on DTO field)
    - Naming conventions (`{Action}UseCase`, `{Name}DataSource`, `{Name}ModelMapper`, event suffix `Event`, handler camelCase, …)
    - Bloc compliance (init event present, sub-state unions with 4 variants, error variant carries `Failure`)
@@ -223,19 +230,19 @@ Do NOT proceed until all five are read. The body below is a summary; the docs ar
 
 ## Team Mode (auto-triggered)
 
-Team mode is decided in **Step 1.5** above based on `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/team-config.json`. Once team mode is selected, do NOT run the single-agent steps in this file — delegate to the architect + parallel implementer flow described in Step 1.5.
+Team mode is decided in **Step 1.5** above based on `${UFIL_ROOT}/config/team-config.json`. Once team mode is selected, do NOT run the single-agent steps in this file — delegate to the architect + parallel implementer flow described in Step 1.5.
 
 To change thresholds, max parallel agents, or split strategy, edit `team-config.json` directly. To disable auto team mode, set `autoTrigger.enabled = false`.
 
 ## References
 
-Plugin docs live at `$CLAUDE_PLUGIN_ROOT` (run `echo $CLAUDE_PLUGIN_ROOT` to resolve). Do NOT look for `docs/` in the project working directory.
+Plugin docs live under the resolved `UFIL_ROOT`. Do NOT substitute similarly named project documentation for these references.
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
-- `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns and conventions
-- `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md` — Data layer patterns, DTOs, datasources
-- `${CLAUDE_PLUGIN_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer, pages, widgets
-- `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
-- `${CLAUDE_PLUGIN_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
-- `${CLAUDE_PLUGIN_ROOT}/docs/CODE_STYLE.md` — Import ordering and code formatting
-- `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` — Mapper creation rules (apply to BOTH project types)
+- `${UFIL_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
+- `${UFIL_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns and conventions
+- `${UFIL_ROOT}/docs/DATA_LAYER.md` — Data layer patterns, DTOs, datasources
+- `${UFIL_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer, pages, widgets
+- `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
+- `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
+- `${UFIL_ROOT}/docs/CODE_STYLE.md` — Import ordering and code formatting
+- `${UFIL_ROOT}/docs/MAPPERS.md` — Mapper creation rules (apply to BOTH project types)

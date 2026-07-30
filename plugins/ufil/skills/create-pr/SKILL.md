@@ -1,12 +1,17 @@
 ---
+name: create-pr
 description: "Create a GitHub pull request with structured summary and changes."
-argument-hint: "[base-branch] (default: develop)"
-allowed-tools: ["Bash", "Read", "Glob", "Grep"]
+disable-model-invocation: true
 ---
+
+Use the current user request as this skill's input. In Claude Code invoke it as
+`/ufil:create-pr`; in Codex invoke it as `$ufil:create-pr`. Resolve `UFIL_ROOT`
+to the plugin root containing this skill; Claude Code may provide
+`CLAUDE_PLUGIN_ROOT`, while Codex can resolve it from the installed skill path.
 
 Create a GitHub pull request with structured description.
 
-Arguments: $ARGUMENTS (optional base branch, defaults to `develop`)
+Arguments: <requested arguments> (optional base branch, defaults to `develop`)
 
 ## Steps
 
@@ -14,7 +19,7 @@ Arguments: $ARGUMENTS (optional base branch, defaults to `develop`)
 
 - Run `git status` to check for uncommitted changes — warn if any exist
 - Run `git branch --show-current` to get current branch name (this is the ticket ID)
-- Determine base branch: use `$ARGUMENTS` if provided, otherwise `develop`
+- Determine base branch: use `<requested arguments>` if provided, otherwise `develop`
 - Run `git log <base>..HEAD --oneline` to see all commits in this branch
 - Run `git diff <base>...HEAD --stat` to see files changed summary
 - Run `git diff <base>...HEAD` to see full diff
@@ -134,6 +139,6 @@ N/A
 
 ## References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/PULL_REQUEST.md` — PR format and template
-- `${CLAUDE_PLUGIN_ROOT}/docs/COMMIT_CONVENTION.md` — Commit message format
-- `${CLAUDE_PLUGIN_ROOT}/docs/BRANCHING.md` — Git branching strategy
+- `${UFIL_ROOT}/docs/PULL_REQUEST.md` — PR format and template
+- `${UFIL_ROOT}/docs/COMMIT_CONVENTION.md` — Commit message format
+- `${UFIL_ROOT}/docs/BRANCHING.md` — Git branching strategy

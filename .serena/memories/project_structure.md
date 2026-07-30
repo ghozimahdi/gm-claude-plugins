@@ -1,7 +1,7 @@
 # Project Structure
 
 ```
-gm-claude-plugins/
+gm-aiagent-plugins/
 ├── .claude/
 │   └── commands/
 │       └── release.md              # Repo-level: /release <plugin> [version]

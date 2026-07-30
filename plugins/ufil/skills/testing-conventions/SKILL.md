@@ -1,8 +1,11 @@
 ---
 name: testing-conventions
 description: "GM testing patterns — modular (per-package tests, Failure mocking) vs non-modular (Result helpers), bloc_test, mocktail for Flutter + Clean Architecture"
-disable-model-invocation: true
 ---
+
+Resolve `UFIL_ROOT` to the plugin root containing this skill. Claude Code may
+provide `CLAUDE_PLUGIN_ROOT`; Codex can resolve it from the installed skill
+path.
 
 ## Testing Conventions (GM Standard)
 
@@ -302,5 +305,5 @@ cd packages/presentation/feature_tenant && flutter test test/blocs/tenant_list_b
 
 ### References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
-- `${CLAUDE_PLUGIN_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
+- `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
+- `${UFIL_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module

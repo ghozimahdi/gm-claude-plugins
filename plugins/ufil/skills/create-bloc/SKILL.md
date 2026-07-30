@@ -1,20 +1,25 @@
 ---
+name: create-bloc
 description: "Create a BLoC (3 files: bloc/event/state) following GM BLoC pattern with sub-state unions, optional AlertState, and optional Failure params."
-argument-hint: "<bloc-name> [--path <dir>] [--actions <a1,a2>] [--alert] [--with-failure]"
-allowed-tools: ["Bash", "Read"]
+disable-model-invocation: true
 ---
+
+Use the current user request as this skill's input. In Claude Code invoke it as
+`/ufil:create-bloc`; in Codex invoke it as `$ufil:create-bloc`. Resolve
+`UFIL_ROOT` to the plugin root containing this skill; Claude Code may provide
+`CLAUDE_PLUGIN_ROOT`, while Codex can resolve it from the installed skill path.
 
 Create a BLoC (3 files) following GM `docs/BLOC_PATTERN.md` and `docs/NAMING_CONVENTIONS.md`.
 
 Inspired by [vscode-flutter-bloc-generator](https://github.com/ghozimahdi/vscode-flutter-bloc-generator) — same `{name}_bloc.dart` / `{name}_event.dart` / `{name}_state.dart` layout, but tuned for GM BLoC conventions: freezed events/states, sub-state unions per async action, AlertState, and optional `Failure` params for modular projects.
 
-**Script:** `${CLAUDE_PLUGIN_ROOT}/scripts/create-bloc.sh`
+**Script:** `${UFIL_ROOT}/scripts/create-bloc.sh`
 
 ```
 create-bloc.sh <bloc_name> [--path <dir>] [--actions <a1,a2,...>] [--alert] [--with-failure]
 ```
 
-Arguments: $ARGUMENTS
+Arguments: <requested arguments>
 
 ## Steps
 
@@ -32,7 +37,7 @@ Arguments: $ARGUMENTS
 ### 2. Run the script
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/create-bloc.sh $ARGUMENTS
+bash ${UFIL_ROOT}/scripts/create-bloc.sh <requested arguments>
 ```
 
 ### 3. Output structure
@@ -55,15 +60,16 @@ bash ${CLAUDE_PLUGIN_ROOT}/scripts/create-bloc.sh $ARGUMENTS
 
 ## Examples
 
-```bash
+```text
 # Minimal bloc — only the init event
-/create-bloc home
+/ufil:create-bloc home            # Claude Code
+$ufil:create-bloc home            # Codex
 
 # Home bloc with two actions + AlertState (matches docs/BLOC_PATTERN.md exactly)
-/create-bloc home --actions get_transaction,add_transaction --alert
+/ufil:create-bloc home --actions get_transaction,add_transaction --alert
 
 # Modular property bloc — Failure-typed errors, custom path
-/create-bloc property_detail \
+/ufil:create-bloc property_detail \
   --path packages/presentation/feature_property/lib/src/blocs \
   --actions get_property_detail,delete_property \
   --with-failure
@@ -82,15 +88,15 @@ bash ${CLAUDE_PLUGIN_ROOT}/scripts/create-bloc.sh $ARGUMENTS
 - **AlertState** (optional) — `idle` / `error` / `done`, reset on loading
 - **Error param** (optional, `--with-failure`) — `Failure failure` positional parameter
 
-## When to use vs `/generate-module`
+## When to use vs `generate-module`
 
-- **`/create-bloc`** — adds a single bloc to an existing feature. No domain/data scaffolding, no DI wiring beyond `@injectable`. Quick local generation, like the VSCode extension.
-- **`/generate-module`** — full feature scaffold across `domain_*` / `data_*` / `feature_*` packages (modular) or `lib/features/<name>/` (single-module). Use for new features.
+- **`create-bloc`** — adds a single bloc to an existing feature. No domain/data scaffolding, no DI wiring beyond `@injectable`. Quick local generation, like the VSCode extension.
+- **`generate-module`** — full feature scaffold across `domain_*` / `data_*` / `feature_*` packages (modular) or `lib/features/<name>/` (single-module). Use for new features.
 
 ## References
 
-Plugin docs live at `$CLAUDE_PLUGIN_ROOT` (run `echo $CLAUDE_PLUGIN_ROOT` to resolve).
+Plugin docs live under the resolved `UFIL_ROOT`.
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` — Full BLoC pattern guidelines (source of truth)
-- `${CLAUDE_PLUGIN_ROOT}/docs/NAMING_CONVENTIONS.md` — Naming standards for bloc/event/state files and sub-state classes
-- `${CLAUDE_PLUGIN_ROOT}/skills/bloc-pattern/SKILL.md` — Bloc patterns reference (modular vs single-module)
+- `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — Full BLoC pattern guidelines (source of truth)
+- `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md` — Naming standards for bloc/event/state files and sub-state classes
+- `${UFIL_ROOT}/skills/bloc-pattern/SKILL.md` — Bloc patterns reference (modular vs single-module)

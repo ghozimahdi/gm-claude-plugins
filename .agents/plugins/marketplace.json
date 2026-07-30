@@ -1,0 +1,20 @@
+{
+  "name": "gm-aiagent-plugins",
+  "interface": {
+    "displayName": "GM AI Agent Plugins"
+  },
+  "plugins": [
+    {
+      "name": "ufil",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ufil"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "DeveloperTools"
+    }
+  ]
+}

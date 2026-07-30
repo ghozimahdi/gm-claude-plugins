@@ -21,4 +21,21 @@ find_serena_hooks() {
 }
 
 bin="$(find_serena_hooks)" || exit 0
+
+has_client=false
+for arg in "$@"; do
+  if [[ "$arg" == --client=* ]]; then
+    has_client=true
+    break
+  fi
+done
+
+if [[ "$has_client" == false ]]; then
+  if [[ -n "${PLUGIN_ROOT:-}" ]]; then
+    set -- "$@" "--client=codex"
+  else
+    set -- "$@" "--client=claude-code"
+  fi
+fi
+
 exec "$bin" "$@"

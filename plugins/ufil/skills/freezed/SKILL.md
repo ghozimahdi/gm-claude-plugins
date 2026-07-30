@@ -1,8 +1,11 @@
 ---
 name: freezed
 description: "GM Freezed patterns — model, DTO, state, event, failure, params for Flutter Clean Architecture"
-disable-model-invocation: true
 ---
+
+Resolve `UFIL_ROOT` to the plugin root containing this skill. Claude Code may
+provide `CLAUDE_PLUGIN_ROOT`; Codex can resolve it from the installed skill
+path.
 
 ## Freezed Patterns (GM Standard)
 
@@ -327,7 +330,7 @@ Generated files: `*.freezed.dart`, `*.g.dart` — add to `.gitignore` or `.claud
 
 ### References
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer model patterns, `required DateTime` + `.empty()` factory rule
-- `${CLAUDE_PLUGIN_ROOT}/docs/DATA_LAYER.md` — Data layer DTO patterns
-- `${CLAUDE_PLUGIN_ROOT}/docs/BLOC_PATTERN.md` — Bloc event and state patterns
-- `${CLAUDE_PLUGIN_ROOT}/docs/MAPPERS.md` — Mapper rules + Reusable Sanitization Extensions (`nullable_extensions.dart` in `data_common`/`core`, `dash_extensions.dart` in `feature_common`/`core`)
+- `${UFIL_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer model patterns, `required DateTime` + `.empty()` factory rule
+- `${UFIL_ROOT}/docs/DATA_LAYER.md` — Data layer DTO patterns
+- `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — Bloc event and state patterns
+- `${UFIL_ROOT}/docs/MAPPERS.md` — Mapper rules + Reusable Sanitization Extensions (`nullable_extensions.dart` in `data_common`/`core`, `dash_extensions.dart` in `feature_common`/`core`)

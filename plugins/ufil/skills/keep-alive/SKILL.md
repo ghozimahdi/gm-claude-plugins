@@ -1,13 +1,15 @@
 ---
-description: "Prevent macOS from auto-sleeping. Run /keep-alive off to stop."
-argument-hint: "[on|off|status]"
-allowed-tools: ["Bash"]
-model: haiku
+name: keep-alive
+description: "Prevent macOS from auto-sleeping. Run /ufil:keep-alive off to stop."
+disable-model-invocation: true
 ---
 
-Toggle macOS sleep prevention using `caffeinate`. The process runs detached so it survives this Claude Code session — it only stops when you run `/keep-alive off` or reboot.
+Use the current user request as this skill's input. In Claude Code invoke it as
+`/ufil:keep-alive`; in Codex invoke it as `$ufil:keep-alive`.
 
-Arguments: $ARGUMENTS (`on`, `off`, `status`, or empty which defaults to `on`)
+Toggle macOS sleep prevention using `caffeinate`. The process runs detached so it survives this Claude Code session — it only stops when you run `/ufil:keep-alive off` or reboot.
+
+Arguments: <requested arguments> (`on`, `off`, `status`, or empty which defaults to `on`)
 
 ## PID file
 
@@ -32,7 +34,7 @@ Arguments: $ARGUMENTS (`on`, `off`, `status`, or empty which defaults to `on`)
    disown
    ```
    Flags: `-d` display, `-i` idle, `-m` disk, `-s` system (AC only), `-u` user-active assertion.
-4. Verify the PID is alive, then report "keep-alive ON (PID <pid>) — run `/keep-alive off` to stop".
+4. Verify the PID is alive, then report "keep-alive ON (PID <pid>) — run `/ufil:keep-alive off` to stop".
 
 ### 3. `off` — stop caffeinate
 
