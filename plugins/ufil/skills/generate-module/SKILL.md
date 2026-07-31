@@ -1,6 +1,7 @@
 ---
 name: generate-module
 description: "Generate a feature module (domain/data/presentation) for modular Flutter projects following GM clean architecture."
+argument-hint: "<module-name> [--layer domain|data|presentation|all]"
 disable-model-invocation: true
 ---
 

@@ -1,6 +1,7 @@
 ---
 name: ship
 description: "Ship a feature — write tests, review code, commit, and create PR."
+argument-hint: "<feature-scope>"
 disable-model-invocation: true
 ---
 

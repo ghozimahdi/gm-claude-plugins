@@ -1,6 +1,7 @@
 ---
 name: review
 description: "Review the current codebase for architecture violations. Use for code quality audits."
+argument-hint: ""
 disable-model-invocation: true
 ---
 

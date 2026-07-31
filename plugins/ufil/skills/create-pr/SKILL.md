@@ -1,6 +1,7 @@
 ---
 name: create-pr
 description: "Create a GitHub pull request with structured summary and changes."
+argument-hint: "[base-branch]"
 disable-model-invocation: true
 ---
 

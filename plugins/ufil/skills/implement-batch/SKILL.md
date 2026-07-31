@@ -1,6 +1,7 @@
 ---
 name: implement-batch
 description: "Implement multiple features in parallel using multiple agents. Auto-scales based on task count."
+argument-hint: "<feature-1> [feature-2] [...]"
 disable-model-invocation: true
 ---
 

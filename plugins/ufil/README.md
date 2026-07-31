@@ -21,7 +21,20 @@ UFIL exposes the same skills to both clients:
 - Claude Code: `/ufil:<skill> [arguments]`
 - Codex: `$ufil:<skill> [arguments]`
 
-Architecture and convention skills:
+Skills split into two kinds. The kind is visible directly in each `SKILL.md`'s
+frontmatter, so a diff always tells you which one changed without needing git
+archaeology:
+
+| Kind                 | Frontmatter marker                                | Behavior                                                                                                                                                        |
+| -------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Workflow skills**  | `disable-model-invocation: true` + `argument-hint` | Explicit action, invoked manually with arguments. Originated as `commands/*.md` files and were migrated into `skills/<name>/SKILL.md` (commits `8a9e1e7`, `6dc79d2`) so one file works as a slash command in both clients. |
+| **Reference skills** | neither field set                                  | Auto-loaded by the model when relevant (architecture/pattern knowledge). Take no arguments; were never commands.                                              |
+
+`argument-hint` is a Claude Code-only frontmatter extension (shown in the `/`
+autocomplete menu) — Codex ignores it silently, so it's safe to set on shared
+skill files.
+
+Architecture and convention skills (reference — auto-invoked, no arguments):
 
 | Skill                 | Description                                                       |
 | --------------------- | ----------------------------------------------------------------- |
@@ -34,7 +47,7 @@ Architecture and convention skills:
 | `freezed`             | Model, DTO, state, event, failure, params patterns                 |
 | `flutter-performance` | Const class vs helper, isolate vs compute, ListView optimization   |
 
-Workflow skills:
+Workflow skills (action — migrated from `commands/*.md`, invoked explicitly):
 
 | Skill               | Description                                                       |
 | ------------------- | ----------------------------------------------------------------- |
@@ -57,7 +70,10 @@ Workflow skills:
 
 ### Claude-only RTK Commands
 
-RTK manages Claude Code's global Bash hook, so these stay Claude-specific:
+These live in `commands/*.md`, not `skills/` — the only files in the plugin
+still using the legacy Command format. RTK manages Claude Code's global Bash
+hook, a Claude-only concern, so they were intentionally left out of the
+commands-to-skills migration and have no Codex equivalent:
 
 - `/ufil:rtk-status`
 - `/ufil:rtk-activate`

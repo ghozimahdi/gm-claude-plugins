@@ -1,6 +1,7 @@
 ---
 name: init-project
 description: "Scaffold a new Flutter project with GM clean architecture. Supports modular (multi-package + melos) and single-module structures."
+argument-hint: "<project-name> [--package <bundle-id>] [--modular|--single]"
 disable-model-invocation: true
 ---
 

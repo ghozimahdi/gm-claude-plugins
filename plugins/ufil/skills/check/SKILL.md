@@ -1,6 +1,7 @@
 ---
 name: check
 description: "Run static analysis and formatting to ensure code quality. Use before committing."
+argument-hint: ""
 disable-model-invocation: true
 ---
 

@@ -6,8 +6,8 @@ Supports both **modular** (multi-package + melos) and **single-module** project 
 ## What's Included
 
 - **3 Agents**: Architect, Implementer, Reviewer
-- **24 shared skills**: 8 architecture/convention skills and 16 workflow skills
-- **3 Claude-only commands**: rtk-activate, rtk-deactivate, rtk-status
+- **24 shared skills** (`skills/`, shared with Codex): 8 architecture/convention skills (reference — auto-invoked, no frontmatter markers) and 16 workflow skills (action — `disable-model-invocation: true` + `argument-hint` in frontmatter, migrated from `commands/*.md`; see README.md for the full split and migration commits)
+- **3 Claude-only commands** (`commands/*.md`, legacy Command format, no Codex equivalent): rtk-activate, rtk-deactivate, rtk-status
 - **Team Config**: `config/team-config.json` — thresholds + max parallel agents. `/ufil:implement` auto-detects ticket scope and switches to team mode (architect → parallel implementers in worktrees) when thresholds are exceeded. Tune without editing skill files.
 - **Hooks**: Auto dart fix + format + analyze before git commit
 - **MCP Servers**: Dart & Flutter MCP Server + Serena LSP (auto-onboards on first `plan`, `implement`, or `implement-batch` run when Dart code is detected; manual refresh via `serena-refresh`)

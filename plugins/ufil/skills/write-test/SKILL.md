@@ -1,6 +1,7 @@
 ---
 name: write-test
 description: "Write tests for a feature or file following GM testing conventions."
+argument-hint: "<feature-name|file-path|all>"
 disable-model-invocation: true
 ---
 
