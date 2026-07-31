@@ -1,6 +1,7 @@
 ---
 name: keep-alive
 description: "Prevent macOS from auto-sleeping. Run /ufil:keep-alive off to stop."
+argument-hint: "[on|off|status]"
 disable-model-invocation: true
 ---
 

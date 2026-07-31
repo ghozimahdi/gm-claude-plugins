@@ -1,6 +1,7 @@
 ---
 name: implement
 description: "Implement a feature following clean architecture. Use for end-to-end implementation from a saved plan or ticket."
+argument-hint: "<ticket-id|feature-name>"
 disable-model-invocation: true
 ---
 

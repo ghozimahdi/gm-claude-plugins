@@ -1,6 +1,7 @@
 ---
 name: build
 description: "Run code generation (freezed, injectable, auto_route, envied). Use after adding annotations or modifying annotated code."
+argument-hint: ""
 disable-model-invocation: true
 ---
 

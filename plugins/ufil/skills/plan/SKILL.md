@@ -1,6 +1,7 @@
 ---
 name: plan
 description: "Analyze a GitHub issue/ticket and create a Flutter implementation plan markdown before coding."
+argument-hint: "<issue-id>"
 disable-model-invocation: true
 ---
 

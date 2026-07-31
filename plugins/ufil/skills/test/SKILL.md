@@ -1,6 +1,7 @@
 ---
 name: test
 description: "Run all tests and report results. Use after implementing features."
+argument-hint: ""
 disable-model-invocation: true
 ---
 

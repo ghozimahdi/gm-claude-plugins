@@ -1,6 +1,7 @@
 ---
 name: create-bloc
 description: "Create a BLoC (3 files: bloc/event/state) following GM BLoC pattern with sub-state unions, optional AlertState, and optional Failure params."
+argument-hint: "<bloc-name> [--path <dir>] [--actions <a1,a2>] [--alert] [--with-failure]"
 disable-model-invocation: true
 ---
 

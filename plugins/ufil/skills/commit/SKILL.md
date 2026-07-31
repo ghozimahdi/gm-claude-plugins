@@ -1,6 +1,7 @@
 ---
 name: commit
 description: "Create a git commit using Conventional Commits format with ticket ID."
+argument-hint: "[message]"
 disable-model-invocation: true
 ---
 
