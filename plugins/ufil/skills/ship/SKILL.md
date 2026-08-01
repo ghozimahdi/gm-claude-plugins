@@ -29,7 +29,8 @@ Arguments: <requested arguments> (feature scope like "auth" or "tenant")
 ## Phase 2 — Code Review
 - Run `dart fix --apply lib/`
 - Run analyzer — fix all issues
-- Check: no dynamic, no business logic in UI, freezed everywhere, ScreenUtil for sizing
+- Check: no dynamic, no business logic in UI, freezed everywhere, correct ScreenUtil axes, and empty gaps use `N.verticalSpace`/`N.horizontalSpace`
+- Run `${UFIL_ROOT}/scripts/check-screenutil-spacing.sh lib packages test`
 - Check: Bloc not Cubit, @injectable annotations
 - Non-modular: ErrorMapper in repos, Result not Either
 - Modular: FailureHandlerMixin in repos, query → `Future<Result>`, action → `Future<Failure>`, `switch` on `result.failure` or `failure`
@@ -50,3 +51,4 @@ Arguments: <requested arguments> (feature scope like "auth" or "tenant")
 - `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — Bloc events, states, sub-state unions
 - `${UFIL_ROOT}/docs/COMMIT_CONVENTION.md` — Commit message format
 - `${UFIL_ROOT}/docs/PULL_REQUEST.md` — PR format and template
+- `${UFIL_ROOT}/docs/SCREENUTIL.md` — Responsive dimensions, spacing helpers, and axis rules

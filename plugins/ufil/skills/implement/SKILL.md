@@ -100,6 +100,7 @@ Do NOT ask the user to re-run a different command. Run this flow yourself:
 3. **Merge & verify** — after all agents complete:
    - Merge worktrees back to the working branch (if isolation was used)
    - Resolve conflicts in shared files (router, injector, melos workspace)
+   - Run `${UFIL_ROOT}/scripts/check-screenutil-spacing.sh lib packages test`
    - Run code generation, `dart fix --apply`, `dart format`, `dart analyze`
    - Fix ALL errors before reporting done
 
@@ -107,10 +108,10 @@ Do NOT ask the user to re-run a different command. Run this flow yourself:
    - Architecture violations (page calls UseCase directly, no Bloc; Cubit instead of Bloc; `.toModel()` on DTO; missing separate mapper class; manual `getIt.register*`; `try/catch` in datasource; missing `@JsonKey` on DTO field)
    - Naming conventions (`{Action}UseCase`, `{Name}DataSource`, `{Name}ModelMapper`, event suffix `Event`, handler camelCase, …)
    - Bloc compliance (init event present, sub-state unions with 4 variants, error variant carries `Failure`)
-   - Quality (no `=>` for method bodies, ScreenUtil used for sizing, no business logic in pages)
+   - Quality (no `=>` for method bodies; ScreenUtil axes are correct; empty gaps use `N.verticalSpace`/`N.horizontalSpace`; no business logic in pages)
    - **Fix ALL critical and warning issues found** — re-spawn an implementer agent (or fix inline if small) before proceeding.
 
-5. **Final Verify (MANDATORY after review fixes)** — re-run `dart fix --apply lib/`, formatter, and analyzer. Fix ALL errors and warnings introduced or surfaced by the review fixes. Never skip — review-driven edits often re-introduce lint/analyzer issues.
+5. **Final Verify (MANDATORY after review fixes)** — re-run `${UFIL_ROOT}/scripts/check-screenutil-spacing.sh lib packages test`, `dart fix --apply lib/`, formatter, and analyzer. Fix ALL errors and warnings introduced or surfaced by the review fixes. Never skip — review-driven edits often re-introduce lint/analyzer issues.
 
 6. **Stop**. Do NOT execute the single-agent steps below — they have already been delegated to the parallel agents.
 
@@ -127,8 +128,9 @@ Read in order from the plugin's `${UFIL_ROOT}/docs/` directory:
 3. `${UFIL_ROOT}/docs/DOMAIN_LAYER.md` — Model / Params / Result rules
 4. `${UFIL_ROOT}/docs/DATA_LAYER.md` — DTO / Response / Request rules, datasource, repo impl
 5. `${UFIL_ROOT}/docs/MAPPERS.md` — separate mapper class rules (apply to BOTH project types)
+6. `${UFIL_ROOT}/docs/SCREENUTIL.md` — responsive dimensions and mandatory spacing-axis rules
 
-Do NOT proceed until all five are read. The body below is a summary; the docs are authoritative.
+Do NOT proceed until all six are read. The body below is a summary; the docs are authoritative.
 
 ## Naming Suffixes (apply to BOTH project types)
 
@@ -185,7 +187,7 @@ Do NOT proceed until all five are read. The body below is a summary; the docs ar
 4. **Presentation layer** (`lib/features/<feature>/presentation/`):
    - Events + States: `@freezed abstract class`, sub-state unions per async action, init event mandatory, error variant carries `Failure failure`
    - Bloc: `@injectable`, one per page, `switch` on `Result` (Ok/Error), unwrap `error` into sub-state's `failure` field
-   - Page: `@RoutePage()`, `BlocProvider` with `getIt<>()`, ScreenUtil for all sizing
+   - Page: `@RoutePage()`, `BlocProvider` with `getIt<>()`; use `.w` for width, `.h` for height, `.r` for radius/square size, `.sp` for text/icon size, and `N.verticalSpace`/`N.horizontalSpace` for empty gaps
 
 ## Modular Steps
 
@@ -207,7 +209,7 @@ Do NOT proceed until all five are read. The body below is a summary; the docs ar
 4. **Presentation layer** (`packages/presentation/feature_<feature>/`):
    - Events + States: `@freezed abstract class`, sub-state unions per async action, init event mandatory, error variant carries `@Default(Failure.noFailure()) Failure failure`
    - Bloc: `@injectable`, one per page, query → `switch` on `result.failure`, action → `switch` on `failure`
-   - Page: `@RoutePage()`, `BlocProvider` with `getIt<>()`, ScreenUtil for all sizing
+   - Page: `@RoutePage()`, `BlocProvider` with `getIt<>()`; use `.w` for width, `.h` for height, `.r` for radius/square size, `.sp` for text/icon size, and `N.verticalSpace`/`N.horizontalSpace` for empty gaps
    - Config: `Feature<Feature>Config extends AppConfig` + `di.dart`
 
 ## Shared Steps
@@ -216,7 +218,7 @@ Do NOT proceed until all five are read. The body below is a summary; the docs ar
    - Modular: add package to workspace, add Config init to `app/lib/injector.dart`, add route to `app/lib/app_router.dart`
    - Non-modular: add route to `lib/app_router.dart`
 
-6. **Verify (MANDATORY)** — run `dart fix --apply lib/`, analyzer, formatter. Fix ALL errors and warnings. Never skip this step.
+6. **Verify (MANDATORY)** — run `${UFIL_ROOT}/scripts/check-screenutil-spacing.sh lib packages test`, `dart fix --apply lib/`, analyzer, and formatter. Fix ALL errors and warnings. Never skip this step.
 
 7. **Tests** — bloc test, repository test, usecase test, DTO test
 
@@ -224,10 +226,10 @@ Do NOT proceed until all five are read. The body below is a summary; the docs ar
    - Architecture violations (page calls UseCase directly, no Bloc; Cubit instead of Bloc; `.toModel()` on DTO; missing separate mapper class; manual `getIt.register*`; `try/catch` in datasource; missing `@JsonKey` on DTO field)
    - Naming conventions (`{Action}UseCase`, `{Name}DataSource`, `{Name}ModelMapper`, event suffix `Event`, handler camelCase, …)
    - Bloc compliance (init event present, sub-state unions with 4 variants, error variant carries `Failure`)
-   - Quality (no `=>` for method bodies, ScreenUtil used for sizing, no business logic in pages)
+   - Quality (no `=>` for method bodies; ScreenUtil axes are correct; empty gaps use `N.verticalSpace`/`N.horizontalSpace`; no business logic in pages)
    - **Fix ALL critical and warning issues found** before proceeding.
 
-9. **Final Verify (MANDATORY after review fixes)** — re-run `dart fix --apply lib/`, formatter, and analyzer. Fix ALL errors and warnings introduced or surfaced by the review fixes. Never skip this step — review-driven edits often re-introduce lint/analyzer issues.
+9. **Final Verify (MANDATORY after review fixes)** — re-run `${UFIL_ROOT}/scripts/check-screenutil-spacing.sh lib packages test`, `dart fix --apply lib/`, formatter, and analyzer. Fix ALL errors and warnings introduced or surfaced by the review fixes. Never skip this step — review-driven edits often re-introduce lint/analyzer issues.
 
 ## Team Mode (auto-triggered)
 
@@ -247,3 +249,4 @@ Plugin docs live under the resolved `UFIL_ROOT`. Do NOT substitute similarly nam
 - `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
 - `${UFIL_ROOT}/docs/CODE_STYLE.md` — Import ordering and code formatting
 - `${UFIL_ROOT}/docs/MAPPERS.md` — Mapper creation rules (apply to BOTH project types)
+- `${UFIL_ROOT}/docs/SCREENUTIL.md` — Responsive dimensions, spacing helpers, and axis rules

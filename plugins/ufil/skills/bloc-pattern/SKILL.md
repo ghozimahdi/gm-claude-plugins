@@ -304,11 +304,16 @@ Exception: Flutter controllers (TextEditingController, PageController, ScrollCon
 
 ```dart
 Padding(padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h))
-SizedBox(height: 16.h)
+16.verticalSpace
+8.horizontalSpace
 Icon(Icons.home, size: 24.sp)
 BorderRadius.circular(12.r)
 TextStyle(fontSize: 14.sp)
 ```
+
+Use `num.verticalSpace` and `num.horizontalSpace` for empty gaps. Do not
+use `SizedBox(height: N.h)` or `SizedBox(width: N.w)` as spacing. See
+`${UFIL_ROOT}/docs/SCREENUTIL.md` for the complete mapping and exceptions.
 
 ### Paging Pattern
 

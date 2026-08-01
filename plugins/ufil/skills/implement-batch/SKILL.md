@@ -112,13 +112,14 @@ Project type: <modular|single-module>
 6. Repository impls (@LazySingleton(as:), with error handler mixin)
 7. Bloc events + states (@freezed abstract class, sub-state unions)
 8. Bloc (@injectable, part/part of structure)
-9. Pages + Widgets (@RoutePage, BlocProvider, ScreenUtil)
+9. Pages + Widgets (@RoutePage, BlocProvider, ScreenUtil; empty gaps use N.verticalSpace/N.horizontalSpace)
 
 ## After writing code:
 1. Run code generation
-2. Run dart fix --apply lib/
-3. Run dart format lib/
-4. Run dart analyze — fix ALL errors
+2. Run ${UFIL_ROOT}/scripts/check-screenutil-spacing.sh lib packages test
+3. Run dart fix --apply lib/
+4. Run dart format lib/
+5. Run dart analyze — fix ALL errors
 
 ## Mandatory rules:
 - Always Bloc, never Cubit
@@ -127,6 +128,7 @@ Project type: <modular|single-module>
 - Freezed everywhere
 - @JsonKey on every DTO field
 - No arrow (=>) for method bodies
+- Empty vertical/horizontal gaps use `N.verticalSpace`/`N.horizontalSpace`; never spacing-only `SizedBox(height: N.h)` or `SizedBox(width: N.w)`
 - Sub-state freezed unions, never flat bool flags
 - Modular: FailureHandlerMixin, query → Future<Result> (Failure + data), action → Future<Failure>, separate mapper classes
 - Single-module: ErrorMapper + Result<T>
@@ -142,6 +144,7 @@ After all agents complete:
 2. If using worktrees, merge changes back to the working branch
 3. Resolve any conflicts (shared files like router, injector)
 4. Run full verification:
+   - `${UFIL_ROOT}/scripts/check-screenutil-spacing.sh lib packages test`
    - Modular: `melos run build`
    - Single: `fvm dart run build_runner build --delete-conflicting-outputs`
 5. Run `fvm dart fix --apply lib/`
@@ -155,7 +158,7 @@ After merge & verify pass, read `${UFIL_ROOT}/agents/reviewer.md` as role guidan
 - Architecture violations: page calls UseCase directly (no Bloc), Cubit instead of Bloc, `.toModel()` on DTO, missing separate mapper class, manual `getIt.register*`, `try/catch` in datasource, missing `@JsonKey` on DTO field
 - Naming conventions: `{Action}UseCase`, `{Name}DataSource`, `{Name}ModelMapper`, event suffix `Event`, handler camelCase
 - Bloc compliance: init event present, sub-state unions with 4 variants, error variant carries `Failure`
-- Quality: no `=>` for method bodies, ScreenUtil for sizing, no business logic in pages
+- Quality: no `=>` for method bodies; ScreenUtil axes are correct; empty gaps use `N.verticalSpace`/`N.horizontalSpace`; no business logic in pages
 
 **Fix ALL critical and warning issues found.** If an issue is large, delegate it back to an implementation subagent for that stream; if small, fix inline.
 
@@ -164,9 +167,10 @@ After merge & verify pass, read `${UFIL_ROOT}/agents/reviewer.md` as role guidan
 After review fixes, re-run the full verification pass:
 
 1. Modular: `melos run build` — Single: `fvm dart run build_runner build --delete-conflicting-outputs`
-2. `fvm dart fix --apply lib/`
-3. `fvm dart format lib/`
-4. `fvm dart analyze` — fix ALL errors and warnings
+2. `${UFIL_ROOT}/scripts/check-screenutil-spacing.sh lib packages test`
+3. `fvm dart fix --apply lib/`
+4. `fvm dart format lib/`
+5. `fvm dart analyze` — fix ALL errors and warnings
 
 Never skip this — review-driven edits frequently re-introduce lint/analyzer issues.
 
@@ -208,3 +212,4 @@ Codex:  $ufil:implement-batch order order-history
 - `${UFIL_ROOT}/docs/DATA_LAYER.md` — Data layer patterns
 - `${UFIL_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer
 - `${UFIL_ROOT}/docs/BLOC_PATTERN.md` — Bloc patterns
+- `${UFIL_ROOT}/docs/SCREENUTIL.md` — Responsive dimensions, spacing helpers, and axis rules

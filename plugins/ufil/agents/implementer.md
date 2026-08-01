@@ -19,6 +19,7 @@ Reference docs live INSIDE the plugin directory, NOT the project working directo
    - `${UFIL_ROOT}/docs/DOMAIN_LAYER.md` — Model/Params/Result rules
    - `${UFIL_ROOT}/docs/DATA_LAYER.md` — DTO/Response/Request, datasource, repo impl
    - `${UFIL_ROOT}/docs/MAPPERS.md` — separate mapper class rules (apply to BOTH project types)
+   - `${UFIL_ROOT}/docs/SCREENUTIL.md` — sizing axes and mandatory spacing extensions
 4. Existing files in the project may violate plugin conventions. Do NOT mirror their style — follow the plugin docs and fix the existing files when you touch them.
 
 ## Your Role
@@ -73,7 +74,9 @@ Architecture & patterns:
 - **Pages MUST NOT call UseCases directly (NON-NEGOTIABLE)** — every async action (even one-shot ops like logout/refresh/delete) goes through a Bloc. The page only does `context.read<TBloc>().add(event)` to dispatch and `BlocBuilder`/`BlocConsumer`/`BlocSelector`/`BlocListener` to read. A page that imports a UseCase or calls `getIt<XUseCase>()` is ALWAYS wrong — there is NO "too simple to need a bloc" exception. Fix by: (1) add sub-state class for the action, (2) add event to bloc, (3) inject the UseCase into the bloc constructor, (4) page dispatches the event.
 - **No local UI state when Bloc exists** — all state through Bloc events/states
   - Exception: Flutter controllers (`TextEditingController`, `PageController`, `ScrollController`, `FocusNode`, `AnimationController`, `GlobalKey<FormState>`) are OK as local fields
-- **ScreenUtil for all sizing** — `.w`, `.h`, `.sp`, `.r`
+- **ScreenUtil for all sizing** — `.w`, `.h`, `.sp`, `.r`; empty
+  gaps MUST use `N.horizontalSpace` / `N.verticalSpace`, never
+  `SizedBox(width: N.w)` / `SizedBox(height: N.h)`
 - **Colors MUST come from `AppColors` (flutter_gen)** — NEVER `Color(0xFF...)`, NEVER `Colors.red`/`Colors.blue`/`Colors.grey`/`.shadeXxx`, NEVER inline hex. Source of truth is `colors.xml`. Workflow when a needed color is missing:
   1. Add the entry to `colors.xml` (modular: `packages/presentation/feature_common/assets/colors/colors.xml`; single-module: `assets/colors/colors.xml`).
   2. Regenerate — modular: `melos run generate:assets`; single-module: `fvm dart run build_runner build --delete-conflicting-outputs`.

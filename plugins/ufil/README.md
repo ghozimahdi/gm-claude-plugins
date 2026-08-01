@@ -191,7 +191,7 @@ Invoke workflows with the plugin-qualified skill name:
 - `@injectable` for DI (never manual getIt.register\*)
 - Dio for networking
 - Separate `@lazySingleton` mapper classes (never `.toModel()` on DTO)
-- ScreenUtil for all sizing
+- ScreenUtil with semantic axes; empty gaps use `N.verticalSpace`/`N.horizontalSpace`
 - Sub-state freezed unions per async action (never flat bool flags)
 
 ## Version Detection

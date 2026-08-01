@@ -1587,7 +1587,7 @@ class _LoginViewState extends State<_LoginView> {
                   controller: _emailController,
                   decoration: InputDecoration(labelText: context.l10n.email),
                 ),
-                SizedBox(height: 12.h),
+                12.verticalSpace,
                 TextField(
                   controller: _passwordController,
                   obscureText: true,
@@ -1595,7 +1595,7 @@ class _LoginViewState extends State<_LoginView> {
                     labelText: context.l10n.password,
                   ),
                 ),
-                SizedBox(height: 24.h),
+                24.verticalSpace,
                 ElevatedButton(
                   onPressed: isLoading
                       ? null

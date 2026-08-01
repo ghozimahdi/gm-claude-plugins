@@ -190,7 +190,7 @@ Creates:
 - SDK version auto-detected — never hardcode
 - Use Dio for datasources, NOT retrofit — baseUrl is set on Dio via NetworkModule
 - Datasources inject `Dio` only — no `DataSourceConfig` injection in datasources
-- ScreenUtil for all sizing
+- ScreenUtil: `.w` for width, `.h` for height, `.r` for radius/square size, `.sp` for text/icon size; empty gaps MUST use `N.verticalSpace`/`N.horizontalSpace`
 - Bloc not Cubit
 - Injectable for DI, never manual registration
 - Freezed for all models/states/events
@@ -201,3 +201,4 @@ Creates:
 - `${UFIL_ROOT}/docs/ARCHITECTURE.md` — Clean Architecture overview, modular vs single-module
 - `${UFIL_ROOT}/docs/VSCODE_SETUP.md` — VS Code auto-generated configuration
 - `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
+- `${UFIL_ROOT}/docs/SCREENUTIL.md` — Responsive dimensions, spacing helpers, and axis rules

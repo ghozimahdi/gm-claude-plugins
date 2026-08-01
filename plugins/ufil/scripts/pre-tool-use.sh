@@ -16,7 +16,14 @@ case "$hook_input" in
     ;;
 esac
 
-if ! command -v fvm >/dev/null 2>&1 || [[ ! -d lib ]]; then
+if [[ ! -d lib ]]; then
+  exit 0
+fi
+
+ufil_root="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+"$ufil_root/scripts/check-screenutil-spacing.sh" lib packages test >&2 || exit 2
+
+if ! command -v fvm >/dev/null 2>&1; then
   exit 0
 fi
 

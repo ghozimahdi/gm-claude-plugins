@@ -30,11 +30,13 @@ Review the current codebase for architecture violations.
    - Local UI state when Bloc exists
    - DTO mapper as extension instead of `.toModel()` method
    - DTO field without `@JsonKey(name: '...')`
+   - Wrong ScreenUtil axis (`width: N.h` or `height: N.w`)
+   - Empty spacing-only `SizedBox(height: N.h)` / `SizedBox(width: N.w)` instead of `N.verticalSpace` / `N.horizontalSpace`
 
 2. **Missing requirements:**
    - Models with nullable fields (should use @Default)
    - DTOs with non-nullable fields (should be nullable)
-   - Pages without ScreenUtil
+   - Pages that do not follow `${UFIL_ROOT}/docs/SCREENUTIL.md`
    - Bloc without @injectable annotation
    - Missing BlocProvider
 
@@ -63,7 +65,7 @@ Review the current codebase for architecture violations.
 
 | File | Line | Issue | Severity | Fix |
 
-Run analyzer at the end to confirm zero issues.
+Run `${UFIL_ROOT}/scripts/check-screenutil-spacing.sh lib packages test`, then run analyzer at the end to confirm zero issues.
 
 ## References
 
@@ -73,3 +75,4 @@ Run analyzer at the end to confirm zero issues.
 - `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
 - `${UFIL_ROOT}/docs/DATA_LAYER.md` — Data layer patterns, DTOs, datasources
 - `${UFIL_ROOT}/docs/DOMAIN_LAYER.md` — Domain layer patterns and conventions
+- `${UFIL_ROOT}/docs/SCREENUTIL.md` — Responsive dimensions, spacing helpers, and axis rules

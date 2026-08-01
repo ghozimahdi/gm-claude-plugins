@@ -111,7 +111,7 @@ Create `lib/features/<name>/` with:
 - Single-module repo impls: `with ErrorMapper`, injects mapper(s) + datasource, calls mapper inside try, `Result.ok(_resultMapper.mapFromData(response))` / `Result.error(mapToFailure(e))`
 - Modular bloc: `switch` on `result.failure` (NoFailure = success), error state carries `Failure`
 - Single-module bloc: `switch` on Result (Ok/Error), error state carries `Failure` (NOT `String`)
-- All sizing with ScreenUtil (.w, .h, .sp, .r)
+- ScreenUtil: `.w` for width, `.h` for height, `.r` for radius/square size, `.sp` for text/icon size; empty gaps MUST use `N.verticalSpace`/`N.horizontalSpace`
 - Bloc not Cubit
 
 ## References
@@ -124,3 +124,4 @@ Plugin docs live under the resolved `UFIL_ROOT`.
 - `${UFIL_ROOT}/docs/PRESENTATION_LAYER.md` — Presentation layer, pages, widgets
 - `${UFIL_ROOT}/docs/NAMING_CONVENTIONS.md` — File and class naming standards
 - `${UFIL_ROOT}/docs/MAPPERS.md` — Mapper creation rules (apply to BOTH project types)
+- `${UFIL_ROOT}/docs/SCREENUTIL.md` — Responsive dimensions, spacing helpers, and axis rules

@@ -13,6 +13,7 @@ You are the **Reviewer** for a Flutter app using Clean Architecture + Bloc. You 
 1. Resolve `UFIL_ROOT` to the plugin's absolute path. A native Claude agent can use `CLAUDE_PLUGIN_ROOT`; Codex orchestration can use `PLUGIN_ROOT` or derive the root from the installed skill path.
 2. All `${UFIL_ROOT}/docs/*.md` references in this body are at that absolute path. Do NOT look for `docs/` in the project working directory.
 3. The project may have its own `docs/` describing legacy or non-GM conventions. Treat plugin docs as authoritative; flag deviations as violations rather than copying them.
+4. Read `${UFIL_ROOT}/docs/SCREENUTIL.md` before reviewing presentation code.
 
 ## Your Role
 
@@ -72,10 +73,23 @@ This determines which patterns are correct and which are violations. **Applying 
 - Sub-state using `.initial()`/`.loaded()` instead of `.idle()`/`.done()` naming convention
 - Sub-state private types for non-idle variants (`.loading()`/`.done()`/`.error()` should be public, only `.idle()` is private)
 
+### ScreenUtil Violations (Warning)
+- Empty vertical gaps written as `SizedBox(height: N.h)` instead of
+  `N.verticalSpace`
+- Empty horizontal gaps written as `SizedBox(width: N.w)` instead of
+  `N.horizontalSpace`
+- Width using `.h`, height using `.w`, radius without `.r`, or
+  text/font-icon size without `.sp`
+- Positive visual dimensions without a ScreenUtil extension, unless they are
+  an explicitly documented device-independent requirement
+- Run `"${UFIL_ROOT}/scripts/check-screenutil-spacing.sh" lib packages test`
+  before returning a clean review
+
 ### Missing Requirements (Warning)
 - Models with nullable fields (should use @Default)
 - DTOs with non-nullable fields (should be nullable)
-- Pages without ScreenUtil extensions (.w, .h, .sp, .r)
+- Pages or widgets that do not follow
+  `${UFIL_ROOT}/docs/SCREENUTIL.md`
 - Bloc without @injectable annotation
 - Missing BlocProvider in widget tree
 

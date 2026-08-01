@@ -35,7 +35,7 @@ Supports both **modular** (multi-package + melos) and **single-module** project 
 - Modular error chain: DioException → DioErrorInterceptor → AppException → FailureHandlerMixin → Failure
 - Single-module: repository returns `Future<Result<T>>` where `T` is the mapped domain model/output (mapper runs inside repo before wrapping in `Result.ok(...)`)
 - Single-module error chain: DioException → DioErrorInterceptor → AppException → ErrorMapper mixin → Failure → wrapped in `Result.error(failure)`
-- ScreenUtil for responsive sizing
+- ScreenUtil axes are semantic: `.w` width, `.h` height, `.r` radius/square size, `.sp` text/icon size; empty gaps MUST use `N.verticalSpace`/`N.horizontalSpace` (never spacing-only `SizedBox(height: N.h)` / `SizedBox(width: N.w)`)
 - **Colors MUST use generated `AppColors` from `flutter_gen`** — NEVER `Color(0xFF...)`, NEVER `Colors.red`/`Colors.blue`/`Colors.grey`, NEVER inline hex. Source of truth is `colors.xml` (Android-style XML consumed by flutter_gen → `colors.gen.dart`). Applies to BOTH project types — modular reads from `packages/presentation/feature_common/assets/colors/colors.xml` (regen via `melos run generate:assets`); single-module reads from `assets/colors/colors.xml` (regen via `dart run build_runner build -d`). Adding a new color = edit `colors.xml` first, regenerate, then use `AppColors.xxx`.
 - Single-module: encrypt_shared_preferences for local storage
 - Modular: SharedPreferences via `@preResolve` LocalModule in data_common

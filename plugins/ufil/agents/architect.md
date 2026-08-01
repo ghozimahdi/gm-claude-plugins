@@ -23,6 +23,7 @@ Read these BEFORE designing anything (in order):
 - `${UFIL_ROOT}/docs/DOMAIN_LAYER.md`
 - `${UFIL_ROOT}/docs/DATA_LAYER.md`
 - `${UFIL_ROOT}/docs/MAPPERS.md`
+- `${UFIL_ROOT}/docs/SCREENUTIL.md`
 
 ## Your Role
 
@@ -53,7 +54,9 @@ This determines which patterns, error handling, and DI strategy to use. **NEVER 
 - **Freezed everywhere** — models (@Default, no nullable), DTOs (nullable + `@JsonKey` on EVERY field), states, events, failures
 - **`@JsonKey` on every DTO field** — even when Dart name matches JSON key (e.g., `@JsonKey(name: 'id') String? id`)
 - **No arrow (=>) for method/function/getter bodies** — always use { return ...; }
-- **ScreenUtil for all sizing** — .w, .h, .sp, .r
+- **ScreenUtil for all sizing** — use `.w`, `.h`, `.sp`, and `.r`;
+  empty gaps MUST use `N.horizontalSpace` / `N.verticalSpace`, never a
+  spacing-only `SizedBox`
 - **Domain layer between presentation and data** — blocs use usecases only
 - **Pages MUST NOT call UseCases directly** — every async action (even logout/refresh/delete/one-shot ops) goes through a Bloc. Pages only dispatch events and read state via `BlocBuilder`/`BlocConsumer`/`BlocSelector`/`BlocListener`. Importing a UseCase or calling `getIt<XUseCase>()` from a page is ALWAYS wrong — no "too simple to need a bloc" exception.
 - **Sub-state freezed unions** per async action — never flat bool flags (isLoading, hasError)
