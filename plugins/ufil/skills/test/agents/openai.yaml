@@ -1,0 +1,7 @@
+interface:
+  display_name: "Test Flutter Project"
+  short_description: "Run the complete Flutter test suite"
+  default_prompt: "Use $ufil:test to run and report all Flutter tests."
+
+policy:
+  allow_implicit_invocation: false

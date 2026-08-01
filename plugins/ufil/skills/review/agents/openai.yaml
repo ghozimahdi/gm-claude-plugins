@@ -1,0 +1,7 @@
+interface:
+  display_name: "Review Flutter Architecture"
+  short_description: "Audit code against UFIL architecture rules"
+  default_prompt: "Use $ufil:review to audit this Flutter codebase."
+
+policy:
+  allow_implicit_invocation: false

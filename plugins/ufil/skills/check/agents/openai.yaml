@@ -1,0 +1,7 @@
+interface:
+  display_name: "Check Flutter Quality"
+  short_description: "Run formatting and static analysis"
+  default_prompt: "Use $ufil:check to format and analyze this Flutter project."
+
+policy:
+  allow_implicit_invocation: false

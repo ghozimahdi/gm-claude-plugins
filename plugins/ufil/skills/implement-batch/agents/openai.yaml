@@ -1,0 +1,7 @@
+interface:
+  display_name: "Implement Flutter Feature Batch"
+  short_description: "Implement multiple features with parallel agents"
+  default_prompt: "Use $ufil:implement-batch to implement these Flutter features in parallel."
+
+policy:
+  allow_implicit_invocation: false

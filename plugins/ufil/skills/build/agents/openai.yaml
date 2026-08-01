@@ -1,0 +1,7 @@
+interface:
+  display_name: "Build Generated Flutter Code"
+  short_description: "Run Flutter code generation safely"
+  default_prompt: "Use $ufil:build to regenerate annotated Flutter code."
+
+policy:
+  allow_implicit_invocation: false

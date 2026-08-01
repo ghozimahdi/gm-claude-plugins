@@ -1,0 +1,7 @@
+interface:
+  display_name: "Write Flutter Tests"
+  short_description: "Create tests using UFIL conventions"
+  default_prompt: "Use $ufil:write-test to add tests for this Flutter feature."
+
+policy:
+  allow_implicit_invocation: false

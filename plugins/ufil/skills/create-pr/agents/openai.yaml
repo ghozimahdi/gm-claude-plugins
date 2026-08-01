@@ -1,0 +1,7 @@
+interface:
+  display_name: "Create GitHub Pull Request"
+  short_description: "Prepare and open a structured pull request"
+  default_prompt: "Use $ufil:create-pr to open a pull request for these changes."
+
+policy:
+  allow_implicit_invocation: false

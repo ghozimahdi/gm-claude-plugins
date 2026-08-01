@@ -1,0 +1,7 @@
+interface:
+  display_name: "Create Flutter BLoC"
+  short_description: "Generate a UFIL-compliant Flutter BLoC"
+  default_prompt: "Use $ufil:create-bloc to generate the requested Flutter BLoC."
+
+policy:
+  allow_implicit_invocation: false

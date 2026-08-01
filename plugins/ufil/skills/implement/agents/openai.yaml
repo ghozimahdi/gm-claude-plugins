@@ -1,0 +1,7 @@
+interface:
+  display_name: "Implement Flutter Feature"
+  short_description: "Implement a feature with UFIL conventions"
+  default_prompt: "Use $ufil:implement to implement this Flutter feature end to end."
+
+policy:
+  allow_implicit_invocation: false

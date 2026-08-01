@@ -1,0 +1,7 @@
+interface:
+  display_name: "Ship Flutter Feature"
+  short_description: "Test review commit and open a pull request"
+  default_prompt: "Use $ufil:ship to test, review, and ship this Flutter feature."
+
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Initialize Flutter Project"
+  short_description: "Scaffold a UFIL Flutter project"
+  default_prompt: "Use $ufil:init-project to scaffold the requested Flutter project."
+
+policy:
+  allow_implicit_invocation: false

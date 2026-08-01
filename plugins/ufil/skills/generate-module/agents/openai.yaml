@@ -1,0 +1,7 @@
+interface:
+  display_name: "Generate Flutter Module"
+  short_description: "Create a clean-architecture feature module"
+  default_prompt: "Use $ufil:generate-module to create the requested Flutter feature module."
+
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Plan Flutter Feature"
+  short_description: "Create an implementation plan from a ticket"
+  default_prompt: "Use $ufil:plan to plan this Flutter issue before coding."
+
+policy:
+  allow_implicit_invocation: false

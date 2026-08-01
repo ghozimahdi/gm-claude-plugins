@@ -1,0 +1,7 @@
+interface:
+  display_name: "Manage macOS Keep Alive"
+  short_description: "Control sleep prevention during long tasks"
+  default_prompt: "Use $ufil:keep-alive to manage macOS sleep prevention."
+
+policy:
+  allow_implicit_invocation: false
