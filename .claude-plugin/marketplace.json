@@ -9,7 +9,7 @@
       "name": "ufil",
       "source": "./plugins/ufil",
       "description": "UFIL (Ultimate Flutter Intelligent Layer) — Claude Code plugin for Flutter Clean Architecture + Modularization with Dart MCP & LSP integration",
-      "version": "1.0.6"
+      "version": "1.0.7"
     },
     {
       "name": "rubyku",
